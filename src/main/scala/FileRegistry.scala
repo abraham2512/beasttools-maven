@@ -76,6 +76,7 @@ object FileRegistry {
           Await.result(f, Duration.Inf) //MOVE THIS TO DAL file
           replyTo ! FileActionPerformed(s"File ${file.filename} created!")
           HdfsRegistry.startHDFS(file.filesource)
+          DataFileDAL.update_status(file.filename,"available")
           Behaviors.same
         } finally {
           //ASK HDFS Actor from here

@@ -43,5 +43,9 @@ object DataFileDAL {
     println("Get complete")
   }
   }
+  def update_status(filename:String,filestatus:String): Int = {
+    val update = db.run(dao.update_status(filename,filestatus).withPinnedSession)
+    Await.result(update,Duration.Inf)
+  }
 
 }

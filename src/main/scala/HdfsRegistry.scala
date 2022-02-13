@@ -22,7 +22,7 @@ object HdfsRegistry {
     HDFSActionPerformed("Starting Spark Job")
   }
 
-  private def hdfs_registry(fileURI:String):HDFSActionPerformed = {
+  private def hdfs_registry(fileURI:String,filetype:String = "geojson"):HDFSActionPerformed = {
 
 //    Behaviors.receiveMessage {
 
@@ -31,19 +31,40 @@ object HdfsRegistry {
           .builder
           .appName("HdfsTest")
           .master("local[*]").getOrCreate()
+        val sparkContext = spark.sparkContext
+
         try {
           println("STARTED SPARK JOB")
           //val fileURI = "/Users/abraham/Downloads/Riverside_WaterDistrict2.csv"
-          val df = spark.read.csv(fileURI)
-          df.show(20,truncate = false)
-          val sparkContext = spark.sparkContext
-          //import edu.ucr.cs.bdlab.beast._
-          val polygons = sparkContext.shapefile(fileURI)
+          filetype match {
+            case "geojson" =>
+              val data:SpatialRDD = sparkContext.geojsonFile(fileURI)
+
+
+              data.plotImage(2000,2000,"~/Desktop/output.png")
+              val df = data.toDataFrame(spark)
+
+              df.show()
+
+            case "shapefile" =>
+              println("TODO")
+
+
+            case "csv" =>
+              println("TODO")
+
+            case _ =>
+              println("Unknown")
+          }
+          //val df = spark.read.csv(fileURI)
+          //df.show(20,truncate = false)
+
+          //val polygons = sparkContext.shapefile(fileURI)
           //println(polygons.name)
-          val beastOpts = new mutable.HashMap[String,String]()
-          beastOpts.put("separator",",")
-          beastOpts.put("skipheader","true")
-          beastOpts.put("iformat","geojson")
+//          val beastOpts = new mutable.HashMap[String,String]()
+//          beastOpts.put("separator",",")
+//          beastOpts.put("skipheader","true")
+//          beastOpts.put("iformat","geojson")
 
           println("Success")
           HDFSActionPerformed("Success")

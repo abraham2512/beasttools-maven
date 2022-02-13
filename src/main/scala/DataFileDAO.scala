@@ -25,14 +25,22 @@ class DataFileDAO(val profile: JdbcProfile) {
     props += (filename,filetype,filesource,filestatus)
 
   /** Get the value for the given key */
-  def get(k: String): DBIO[Option[(String,String,String,String)]] =
-    (for(p <- props if p.filename === k) yield p ).result.headOption
+  def get(filename: String): DBIO[Option[(String,String,String,String)]] =
+    (for(p <- props if p.filename === filename) yield p ).result.headOption
 
   /** Get all values */
   def get_all(): DBIO[Seq[(String,String,String,String)]] =
     (for(p <- props ) yield p).result.withPinnedSession
 
+  def update_status(filename:String, filestatus:String): DBIO[Int] = {
+    val q = for { p <- props if p.filename === filename } yield p.filestatus
+    q.update(filestatus)
+  }
+
+  //def delete(filename: String): DBIO[Int] =
+
   /** Get the first element for a Query from this DAO */
   def getFirst[M, U, C[_]](q: Query[M, U, C]): DBIO[U] =
     q.result.head
+
 }
