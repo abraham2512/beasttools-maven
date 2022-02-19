@@ -36,12 +36,8 @@ object DataFileDAL {
     }
 
   def get(k:String): Option[(String,String,String,String)] = {
-  try{
     val file : Future[Option[(String,String,String,String)]] = db.run(dao.get(k).withPinnedSession)
     Await.result(file,Duration.Inf)
-    } finally {
-    println("Get complete")
-  }
   }
   def update_status(filename:String,filestatus:String): Int = {
     val update = db.run(dao.update_status(filename,filestatus).withPinnedSession)

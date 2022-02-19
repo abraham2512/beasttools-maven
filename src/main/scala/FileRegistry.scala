@@ -43,7 +43,7 @@ object FileRegistry {
           val returnFile = File(file_data._1,file_data._2,file_data._3,file_data._4)
           replyTo ! returnFile
 
-          HdfsRegistry.startHDFS(file_data._3)
+          //HdfsRegistry.startHDFS(file_data._3,returnFile)
 
           Behaviors.same
         } catch {
@@ -75,8 +75,8 @@ object FileRegistry {
           val f = DataFileDAL.insert(file)
           Await.result(f, Duration.Inf) //MOVE THIS TO DAL file
           replyTo ! FileActionPerformed(s"File ${file.filename} created!")
-          HdfsRegistry.startHDFS(file.filesource)
-          DataFileDAL.update_status(file.filename,"available")
+          HdfsRegistry.startHDFS(file.filesource,file)
+
           Behaviors.same
         } finally {
           //ASK HDFS Actor from here

@@ -3,9 +3,8 @@ import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import org.apache.spark.sql.SparkSession
 import edu.ucr.cs.bdlab.beast._
-import edu.ucr.cs.bdlab.beast.common.BeastOptions
+import edu.ucr.cs.bdlab.beast.indexing.RSGrovePartitioner
 
-import scala.collection.mutable
 
 object HdfsRegistry {
   sealed trait HdfsCommand
@@ -17,12 +16,12 @@ object HdfsRegistry {
     HDFSActionPerformed("START SUCCESS")
     Behaviors.empty
   }
-  def startHDFS(fileURI:String):HDFSActionPerformed = {
-    hdfs_registry(fileURI)
+  def startHDFS(fileURI:String,file: File):HDFSActionPerformed = {
+    hdfs_registry(fileURI,file)
     HDFSActionPerformed("Starting Spark Job")
   }
 
-  private def hdfs_registry(fileURI:String,filetype:String = "geojson"):HDFSActionPerformed = {
+  private def hdfs_registry(fileURI:String,file:File):HDFSActionPerformed = {
 
 //    Behaviors.receiveMessage {
 
@@ -36,26 +35,31 @@ object HdfsRegistry {
         try {
           println("STARTED SPARK JOB")
           //val fileURI = "/Users/abraham/Downloads/Riverside_WaterDistrict2.csv"
-          filetype match {
-            case "geojson" =>
-              val data:SpatialRDD = sparkContext.geojsonFile(fileURI)
+//          filetype match {
+//            case "geojson" =>
+              DataFileDAL.update_status(file.filename,"started_download")
+              val partitioned_data:SpatialRDD = sparkContext.geojsonFile(fileURI).spatialPartition(classOf[RSGrovePartitioner])
+              partitioned_data.saveAsShapefile(filename="partitioned_data")
+              println("partitioning finished")
+              DataFileDAL.update_status(file.filename,"partitioned")
 
 
-              data.plotImage(2000,2000,"~/Desktop/output.png")
-              val df = data.toDataFrame(spark)
 
-              df.show()
+          //sparkContext.
+//              data.plotImage(2000,2000,"~/Desktop/output.png")
+//              val df = data.toDataFrame(spark)
 
-            case "shapefile" =>
-              println("TODO")
+              //df.show()
 
-
-            case "csv" =>
-              println("TODO")
-
-            case _ =>
-              println("Unknown")
-          }
+//            case "shapefile" =>
+//              println("TODO")
+//
+//            case "csv" =>
+//              println("TODO")
+//
+//            case _ =>
+//              println("Unknown")
+          //}
           //val df = spark.read.csv(fileURI)
           //df.show(20,truncate = false)
 
@@ -77,7 +81,7 @@ object HdfsRegistry {
             println("Error" + _)
             HDFSActionPerformed("Failure")
         } finally {
-          println("Good Bye!")
+          //println("Good Bye!")
           spark.stop()
           HDFSActionPerformed("Exit")
         }
@@ -87,6 +91,7 @@ object HdfsRegistry {
     //}
 
   //}
+
 
 }
 
