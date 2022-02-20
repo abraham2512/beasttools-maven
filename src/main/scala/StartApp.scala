@@ -1,10 +1,12 @@
 
 
+
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
-import scala.util.{Failure,Success}
+
+import scala.util.{Failure, Success}
 
 //#main-class
 object StartApp {
@@ -29,19 +31,18 @@ object StartApp {
       val rootBehavior = Behaviors.setup[Nothing] { context =>
         val fileRegistryActor = context.spawn(FileRegistry(), "FileRegistryActor")
         context.watch(fileRegistryActor)
-
         val routes = new FileRoutes(fileRegistryActor)(context.system)
         startHttpServer(routes.fileRoutes)(context.system)
-
-
         val hdfsRegistryActor = context.spawn(HdfsRegistry(),"HdfsRegistryActor")
         context.watch(hdfsRegistryActor)
-
         Behaviors.empty
       }
 
-    val system = ActorSystem[Nothing](rootBehavior, "HelloAkkaHttpServer")
+    val system = ActorSystem[Nothing](rootBehavior, "BeastAkkaServer")
     //#server-bootstrapping
+
+//    val hdfsRegistryActorRef = context.
+    //hdfsRegistryActor ! "hello"
   }
 }
 //#main-class

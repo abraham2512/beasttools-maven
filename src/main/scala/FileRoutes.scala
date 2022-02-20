@@ -4,12 +4,15 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.util.Timeout
 import FileRegistry._
-import HdfsRegistry.{HdfsCommand, WriteToHdfs}
+//import HdfsRegistry.{HdfsCommand, WriteToHdfs}
+import akka.actor.Identify
+
+
 
 
 
@@ -22,11 +25,17 @@ class FileRoutes(fileRegistry: ActorRef[FileRegistry.Command])(implicit val syst
   //#implicit default timeout value for all requests
   private implicit val timeout: Timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
 
+
   def getFiles: Future[Files] =
     fileRegistry.ask(GetFiles)
 
-  def createFile(file: File): Future[FileActionPerformed] =
+  def createFile(file: File): Future[FileActionPerformed] = {
+
+    println(system.printTree)
+
     fileRegistry.ask(CreateFile(file, _))
+    //Await.result(hdfsRegistry.ask(startHDFS),)
+  }
 
   def getFile(filename: String): Future[File] =
     fileRegistry.ask(GetFile(filename, _))

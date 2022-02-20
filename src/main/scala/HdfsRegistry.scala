@@ -5,74 +5,52 @@ import org.apache.spark.sql.SparkSession
 import edu.ucr.cs.bdlab.beast._
 import edu.ucr.cs.bdlab.beast.indexing.RSGrovePartitioner
 
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
+import akka.actor.typed.scaladsl.{AbstractBehavior,ActorContext,Behaviors}
+import akka.actor.typed.receptionist.{Receptionist,ServiceKey}
 
 object HdfsRegistry {
   sealed trait HdfsCommand
   final case class HDFSActionPerformed(description:String) extends HdfsCommand
-  final case class WriteToHdfs(replyTo: ActorRef[HDFSActionPerformed]) extends  HdfsCommand
+  final case class WriteToHdfs(file:File) extends  HdfsCommand
+  case class SpeakText(msg: String) extends HdfsCommand
+  val HdfsKey: ServiceKey[HdfsCommand] = ServiceKey("HDFS_ACTOR")
 
-  def apply(): Behavior[HDFSActionPerformed] = {
+  def apply(): Behavior[HdfsCommand] = Behaviors.setup{
+  context: ActorContext[HdfsCommand] =>
+    context.system.receptionist ! Receptionist.Register(HdfsKey,context.self)
     println("Hdfs Actor Born!")
-    HDFSActionPerformed("START SUCCESS")
-    Behaviors.empty
-  }
-  def startHDFS(fileURI:String,file: File):HDFSActionPerformed = {
-    hdfs_registry(fileURI,file)
-    HDFSActionPerformed("Starting Spark Job")
-  }
+    //hdfs_registry
+    Behaviors.receiveMessage {
+      case SpeakText(msg) =>
+        println(s"HdfsRegistry: got a msg: $msg")
+        Behaviors.same
 
-  private def hdfs_registry(fileURI:String,file:File):HDFSActionPerformed = {
-
-//    Behaviors.receiveMessage {
-
+      case WriteToHdfs(file:File) =>
         //case WriteToHdfs(replyTo) => {
         val spark = SparkSession
           .builder
           .appName("HdfsTest")
           .master("local[*]").getOrCreate()
         val sparkContext = spark.sparkContext
-
         try {
           println("STARTED SPARK JOB")
           //val fileURI = "/Users/abraham/Downloads/Riverside_WaterDistrict2.csv"
-//          filetype match {
-//            case "geojson" =>
-              DataFileDAL.update_status(file.filename,"started_download")
-              val partitioned_data:SpatialRDD = sparkContext.geojsonFile(fileURI).spatialPartition(classOf[RSGrovePartitioner])
-              partitioned_data.saveAsShapefile(filename="partitioned_data")
-              println("partitioning finished")
-              DataFileDAL.update_status(file.filename,"partitioned")
-
-
+          DataFileDAL.update_status(file.filename,"downloading")
+          val partitioned_data:SpatialRDD = sparkContext.geojsonFile(file.filesource).spatialPartition(classOf[RSGrovePartitioner])
+          partitioned_data.saveAsShapefile(filename="partitioned_data")
+          println("partitioning finished")
+          DataFileDAL.update_status(file.filename,"partitioned")
 
           //sparkContext.
-//              data.plotImage(2000,2000,"~/Desktop/output.png")
-//              val df = data.toDataFrame(spark)
+          //              data.plotImage(2000,2000,"~/Desktop/output.png")
+          //              val df = data.toDataFrame(spark)
 
-              //df.show()
-
-//            case "shapefile" =>
-//              println("TODO")
-//
-//            case "csv" =>
-//              println("TODO")
-//
-//            case _ =>
-//              println("Unknown")
-          //}
-          //val df = spark.read.csv(fileURI)
-          //df.show(20,truncate = false)
-
-          //val polygons = sparkContext.shapefile(fileURI)
-          //println(polygons.name)
-//          val beastOpts = new mutable.HashMap[String,String]()
-//          beastOpts.put("separator",",")
-//          beastOpts.put("skipheader","true")
-//          beastOpts.put("iformat","geojson")
+          //df.show()
 
           println("Success")
           HDFSActionPerformed("Success")
-
+          Behaviors.same
         } catch {
           case e: NoClassDefFoundError =>
             println("Could not get spark session" + e.toString)
@@ -84,13 +62,12 @@ object HdfsRegistry {
           //println("Good Bye!")
           spark.stop()
           HDFSActionPerformed("Exit")
+          Behaviors.same
         }
         //replyTo ! HDFSActionPerformed(s"FILE UPLOAD STARTED")
-        //Behaviors.same
-      }
-    //}
-
-  //}
+        Behaviors.same
+    }
+}
 
 
 }
