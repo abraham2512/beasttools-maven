@@ -1,11 +1,8 @@
 
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
-import akka.actor.typed.scaladsl.Behaviors
 import org.apache.spark.sql.SparkSession
 import edu.ucr.cs.bdlab.beast._
 import edu.ucr.cs.bdlab.beast.indexing.RSGrovePartitioner
-
-import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.actor.typed.scaladsl.{AbstractBehavior,ActorContext,Behaviors}
 import akka.actor.typed.receptionist.{Receptionist,ServiceKey}
 
@@ -19,7 +16,7 @@ object HdfsRegistry {
   def apply(): Behavior[HdfsCommand] = Behaviors.setup{
   context: ActorContext[HdfsCommand] =>
     context.system.receptionist ! Receptionist.Register(HdfsKey,context.self)
-    println("Hdfs Actor Born!")
+    println("HdfsRegistry: Hdfs Actor Born!")
     //hdfs_registry
     Behaviors.receiveMessage {
       case SpeakText(msg) =>
@@ -34,12 +31,12 @@ object HdfsRegistry {
           .master("local[*]").getOrCreate()
         val sparkContext = spark.sparkContext
         try {
-          println("STARTED SPARK JOB")
+          println("HdfsRegistry: STARTED SPARK JOB")
           //val fileURI = "/Users/abraham/Downloads/Riverside_WaterDistrict2.csv"
           DataFileDAL.update_status(file.filename,"downloading")
           val partitioned_data:SpatialRDD = sparkContext.geojsonFile(file.filesource).spatialPartition(classOf[RSGrovePartitioner])
           partitioned_data.saveAsShapefile(filename="partitioned_data")
-          println("partitioning finished")
+          println("HdfsRegistry: Partitioning finished")
           DataFileDAL.update_status(file.filename,"partitioned")
 
           //sparkContext.
@@ -48,15 +45,15 @@ object HdfsRegistry {
 
           //df.show()
 
-          println("Success")
+          println("HdfsRegistry: Success")
           HDFSActionPerformed("Success")
           Behaviors.same
         } catch {
           case e: NoClassDefFoundError =>
-            println("Could not get spark session" + e.toString)
+            println("HdfsRegistry: Could not get spark session" + e.toString)
             HDFSActionPerformed("Failure")
           case _: Throwable =>
-            println("Error" + _)
+            println("HdfsRegistry: Error" + _)
             HDFSActionPerformed("Failure")
         } finally {
           //println("Good Bye!")

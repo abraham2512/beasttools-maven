@@ -3,13 +3,10 @@
 //#file-registry-actor
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
-import akka.actor.typed.receptionist.Receptionist
 import akka.actor.typed.receptionist.Receptionist.{Find, Listing}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.util.Timeout
 
-import scala.collection.immutable
-import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.util.{Failure, Success}
 
@@ -36,10 +33,11 @@ object FileRegistry {
 
 
   def apply(): Behavior[Command]  = Behaviors.setup {
-    println("File Actor Born!")
+    println("FileRegistry: File Actor Born!")
     DataFileDAL()
+    var hdfs:Option[ActorRef[HdfsRegistry.HdfsCommand]] = None
     context: ActorContext[Command] =>
-      var hdfs:Option[ActorRef[HdfsRegistry.HdfsCommand]] = None
+
       Behaviors.receiveMessage {
         case GetFile(filename, replyTo) =>
           try {
@@ -50,31 +48,26 @@ object FileRegistry {
             Behaviors.same
           } catch {
             case e: NoSuchElementException =>
-              println("No Such Element" + e.toString)
+              println("FileRegistry: No Such Element" + e.toString)
               replyTo ! File("", "", "", "")
               Behaviors.same
 
           }
           finally {
-            println("Get File complete")
+            println("FileRegistry: Get File complete")
           }
         //GET ALL FILES implemented here
         case GetFiles(replyTo) =>
-          try {
             val f: Seq[(String, String, String, String)] = DataFileDAL.get_all()
             val files_data = f.map(f => File(f._1, f._2, f._3, f._4))
             replyTo ! Files(files_data)
+            println("FileRegistry: Database get all complete!")
             Behaviors.same
-          } finally {
-            println("Database get all complete!")
-          }
+
         // CREATE FILE implemented here
         case CreateFile(file, replyTo) =>
-          try {
-            println("Started File download")
-            val f = DataFileDAL.insert(file)
-            Await.result(f, Duration.Inf)
-
+            println("FileRegistry: Added file, queuing spark download")
+            DataFileDAL.insert(file)
             implicit val timeout: Timeout = 1.second
             context.ask(context.system.receptionist,Find(HdfsRegistry.HdfsKey))
             {
@@ -84,14 +77,12 @@ object FileRegistry {
                 FileRegistry.Error("No HDFS Actor")
             }
             replyTo ! FileActionPerformed(s"File ${file.filename} created!")
+            println("FileRegistry: Database insert complete!")
+            Behaviors.same
 
-            Behaviors.same
-          } finally {
-            println("Database insert complete!")
-            Behaviors.same
-          }
+        //MESSAGE TO HDFS ACTOR
         case SpeakToHDFS(listing,file) =>
-          println("Brain: Got a FoundTheMouth message")
+          println("FileRegistry: Sending a SpeakToHDFS message")
           val instances: Set[ActorRef[HdfsRegistry.HdfsCommand]] =
             listing.serviceInstances(HdfsRegistry.HdfsKey)
           hdfs = instances.headOption
@@ -101,8 +92,9 @@ object FileRegistry {
           }
           Behaviors.same
 
+        //DEFAULT
         case _ =>
-          print("DEFAULT CASE")
+          print("FileRegistry: DEFAULT CASE")
           Behaviors.same
 
       }

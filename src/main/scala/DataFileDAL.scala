@@ -23,10 +23,11 @@ object DataFileDAL {
       ).withPinnedSession)
     }
 
-    def insert(file: File): Future[Unit] = {
-      db.run(DBIO.seq(
+    def insert(file: File): Unit = {
+      val f = db.run(DBIO.seq(
         dao.insert(file.filename,file.filetype,file.filesource,file.filestatus)
       ).withPinnedSession)
+      Await.result(f,Duration.Inf)
     }
 
     def get_all(): Seq[(String,String,String,String)]= {
