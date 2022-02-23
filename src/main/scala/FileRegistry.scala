@@ -7,10 +7,8 @@ import akka.actor.typed.receptionist.Receptionist.{Find, Listing}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.util.Timeout
 
-import scala.concurrent.duration.{Duration, DurationInt}
+import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
-
-
 
 //#case classes
 case class File(filename:String, filetype:String, filesource:String, filestatus:String) {
@@ -22,20 +20,25 @@ final case class Files(files: Seq[File])
 object FileRegistry {
   //#actor protocol
   sealed trait Command
+  final case class FileActionPerformed(description:String)
+
   final case class GetFiles(replyTo: ActorRef[Files]) extends Command
   final case class GetFile(filename: String,replyTo: ActorRef[File]) extends Command
 
   final case class CreateFile(file: File, replyTo: ActorRef[FileActionPerformed]) extends Command
-  final case class FileActionPerformed(description:String)
+  final case class RunQuery(file:File,query:String,replyTo:ActorRef[FileActionPerformed]) extends Command
 
   final case class SpeakToHDFS(listing: Listing,file: File) extends Command
+  final case class SpeakToQuery(listing: Listing,query:String,file: File) extends Command
+
   final case class Error(error: String) extends Command
 
 
   def apply(): Behavior[Command]  = Behaviors.setup {
     println("FileRegistry: File Actor Born!")
     DataFileDAL()
-    var hdfs:Option[ActorRef[HdfsRegistry.HdfsCommand]] = None
+    var hdfsActor:Option[ActorRef[HdfsRegistry.HdfsCommand]] = None
+    //var queryActor:Option[ActorRef[QueryActor.QueryCommand]] = None
     context: ActorContext[Command] =>
 
       Behaviors.receiveMessage {
@@ -66,7 +69,7 @@ object FileRegistry {
 
         // CREATE FILE implemented here
         case CreateFile(file, replyTo) =>
-            println("FileRegistry: Added file, queuing spark download")
+            println("FileRegistry: Inserted file, queuing spark download")
             DataFileDAL.insert(file)
             implicit val timeout: Timeout = 1.second
             context.ask(context.system.receptionist,Find(HdfsRegistry.HdfsKey))
@@ -85,12 +88,39 @@ object FileRegistry {
           println("FileRegistry: Sending a SpeakToHDFS message")
           val instances: Set[ActorRef[HdfsRegistry.HdfsCommand]] =
             listing.serviceInstances(HdfsRegistry.HdfsKey)
-          hdfs = instances.headOption
-          println(hdfs)
-          hdfs.foreach { m =>
-            m ! HdfsRegistry.WriteToHdfs(file)
+          hdfsActor = instances.headOption
+          println(hdfsActor)
+          hdfsActor.foreach { m =>
+            m ! HdfsRegistry.PartitionToHDFS(file)
           }
           Behaviors.same
+
+//        case RunQuery(file,query,replyTo) =>
+//          println("FileRegistry: Running Query spark download")
+//          implicit val timeout: Timeout = 1.second
+//          context.ask(context.system.receptionist,Find(QueryActor.QueryKey))
+//          {
+//            case Success(listing:Listing) =>
+//              FileRegistry.SpeakToQuery(listing,query,file)
+//            case Failure(_)=>
+//              FileRegistry.Error("No Query Actor")
+//          }
+//          replyTo ! FileActionPerformed(s"Running query!")
+//          Behaviors.same
+//        //MESSAGE TO QUERY ACTOR
+//
+//        case SpeakToQuery(listing, file,query) =>
+//          println("FileRegistry: Sending a SpeakToQuery message")
+//          val instances: Set[ActorRef[QueryActor.QueryCommand]] =
+//            listing.serviceInstances(QueryActor.QueryKey)
+//          queryActor = instances.headOption
+//          println(query)
+//          queryActor.foreach { m =>
+//            m ! QueryActor.SpeakText("HELLO QUERY")
+//          }
+//          Behaviors.same
+
+
 
         //DEFAULT
         case _ =>

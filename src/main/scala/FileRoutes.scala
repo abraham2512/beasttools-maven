@@ -9,12 +9,6 @@ import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.util.Timeout
 import FileRegistry._
-//import HdfsRegistry.{HdfsCommand, WriteToHdfs}
-import akka.actor.Identify
-
-
-
-
 
 class FileRoutes(fileRegistry: ActorRef[FileRegistry.Command])(implicit val system: ActorSystem[_]) {
 
@@ -39,6 +33,8 @@ class FileRoutes(fileRegistry: ActorRef[FileRegistry.Command])(implicit val syst
 
   def getFile(filename: String): Future[File] =
     fileRegistry.ask(GetFile(filename, _))
+
+
   //#all-routes
 
   val fileRoutes: Route =
@@ -59,6 +55,17 @@ class FileRoutes(fileRegistry: ActorRef[FileRegistry.Command])(implicit val syst
             }
           )
         },
+//        pathPrefix("query"){
+//          path(Segment) {query =>
+//            concat(
+//              get {
+//                rejectEmptyResponse {
+//                  onSuccess(runQuery(query)) { response =>
+//                    complete(StatusCodes.OK, response)
+//              }
+//            )
+//          }
+//        },
         // #return file requested
         path(Segment) { filename =>
           concat(

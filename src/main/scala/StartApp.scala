@@ -1,7 +1,4 @@
-
-
-
-import akka.actor.typed.ActorSystem
+import akka.actor.typed.{ActorSystem, MailboxSelector}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
@@ -29,12 +26,15 @@ object StartApp {
   def main(args: Array[String]): Unit = {
     //#server-bootstrapping
       val rootBehavior = Behaviors.setup[Nothing] { context =>
-        val fileRegistryActor = context.spawn(FileRegistry(), "FileRegistryActor")
+        val props = MailboxSelector.fromConfig("my-app.my-special-mailbox")
+        val fileRegistryActor = context.spawn(FileRegistry(),name="FileRegistryActor",props)
         context.watch(fileRegistryActor)
         val routes = new FileRoutes(fileRegistryActor)(context.system)
         startHttpServer(routes.fileRoutes)(context.system)
-        val hdfsRegistryActor = context.spawn(HdfsRegistry(),"HdfsRegistryActor")
+        val hdfsRegistryActor = context.spawn(HdfsRegistry(),name="HdfsRegistryActor", props)
         context.watch(hdfsRegistryActor)
+        //val queryActor = context.spawn(QueryActor(),"QueryActor")
+        //context.watch(queryActor)
         Behaviors.empty
       }
 

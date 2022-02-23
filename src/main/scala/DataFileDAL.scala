@@ -14,7 +14,7 @@ object DataFileDAL {
     def apply(): Unit = {
       val f = create_db()
       Await.result(f, Duration.Inf)
-      println("DAO Object created!")
+      //println("DAO Object created!")
     }
 
     def create_db() : Future[Unit] = {
