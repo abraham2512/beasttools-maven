@@ -1,5 +1,3 @@
-
-
 import slick.dbio.DBIO
 import slick.jdbc.H2Profile
 import slick.jdbc.JdbcBackend.Database
@@ -8,13 +6,11 @@ import scala.concurrent.duration.Duration
 
 
 object DataFileDAL {
-    //sealed trait QueryResult
     private val dao = new DataFileDAO(H2Profile)
     private val db = Database.forConfig("h2")
     def apply(): Unit = {
       val f = create_db()
       Await.result(f, Duration.Inf)
-      //println("DAO Object created!")
     }
 
     def create_db() : Future[Unit] = {

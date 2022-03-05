@@ -26,23 +26,26 @@ object StartApp {
   def main(args: Array[String]): Unit = {
     //#server-bootstrapping
       val rootBehavior = Behaviors.setup[Nothing] { context =>
-        val props = MailboxSelector.fromConfig("my-app.my-special-mailbox")
-        val fileRegistryActor = context.spawn(FileRegistry(),name="FileRegistryActor",props)
+        //val props = MailboxSelector.defaultMailbox()
+        val fileRegistryActor = context.spawn(FileRegistry(),name="FileRegistryActor",MailboxSelector.bounded(capacity = 100))
         context.watch(fileRegistryActor)
-        val routes = new FileRoutes(fileRegistryActor)(context.system)
+
+        val tileActor = context.spawn(TileActor(), name="TileActor",MailboxSelector.bounded(capacity = 100))
+        context.watch(tileActor)
+        val routes = new Routes(fileRegistryActor,tileActor)(context.system)
         startHttpServer(routes.fileRoutes)(context.system)
-        val hdfsRegistryActor = context.spawn(HdfsRegistry(),name="HdfsRegistryActor", props)
+
+        val hdfsRegistryActor = context.spawn(HdfsActor(),name="HdfsRegistryActor",MailboxSelector.bounded(capacity = 100))
         context.watch(hdfsRegistryActor)
-        //val queryActor = context.spawn(QueryActor(),"QueryActor")
-        //context.watch(queryActor)
         Behaviors.empty
       }
-
-    val system = ActorSystem[Nothing](rootBehavior, "BeastAkkaServer")
-    //#server-bootstrapping
-
-//    val hdfsRegistryActorRef = context.
-    //hdfsRegistryActor ! "hello"
+    try {
+      val system = ActorSystem[Nothing](rootBehavior, "BeastAkkaServer")
+      //#server-bootstrapping
+    }catch {
+      case e:Exception =>
+        println(e.toString)
+    }
   }
 }
 //#main-class

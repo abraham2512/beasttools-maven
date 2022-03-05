@@ -1,5 +1,3 @@
-
-
 //#file-registry-actor
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
@@ -37,7 +35,7 @@ object FileRegistry {
   def apply(): Behavior[Command]  = Behaviors.setup {
     println("FileRegistry: File Actor Born!")
     DataFileDAL()
-    var hdfsActor:Option[ActorRef[HdfsRegistry.HdfsCommand]] = None
+    var hdfsActor:Option[ActorRef[HdfsActor.HdfsCommand]] = None
     //var queryActor:Option[ActorRef[QueryActor.QueryCommand]] = None
     context: ActorContext[Command] =>
 
@@ -72,7 +70,7 @@ object FileRegistry {
             println("FileRegistry: Inserted file, queuing spark download")
             DataFileDAL.insert(file)
             implicit val timeout: Timeout = 1.second
-            context.ask(context.system.receptionist,Find(HdfsRegistry.HdfsKey))
+            context.ask(context.system.receptionist,Find(HdfsActor.HdfsKey))
             {
               case Success(listing:Listing) =>
                 FileRegistry.SpeakToHDFS(listing,file)
@@ -86,13 +84,14 @@ object FileRegistry {
         //MESSAGE TO HDFS ACTOR
         case SpeakToHDFS(listing,file) =>
           println("FileRegistry: Sending a SpeakToHDFS message")
-          val instances: Set[ActorRef[HdfsRegistry.HdfsCommand]] =
-            listing.serviceInstances(HdfsRegistry.HdfsKey)
+          val instances: Set[ActorRef[HdfsActor.HdfsCommand]] =
+            listing.serviceInstances(HdfsActor.HdfsKey)
           hdfsActor = instances.headOption
           println(hdfsActor)
           hdfsActor.foreach { m =>
-            m ! HdfsRegistry.PartitionToHDFS(file)
+            m ! HdfsActor.PartitionToHDFS(file)
           }
+
           Behaviors.same
 
 //        case RunQuery(file,query,replyTo) =>

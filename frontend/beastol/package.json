@@ -1,0 +1,16 @@
+{
+  "name": "beastol",
+  "version": "1.0.0",
+  "description": "Example using OpenLayers with Parcel",
+  "scripts": {
+    "start": "parcel serve index.html",
+    "build": "parcel build --public-url . index.html"
+  },
+  "dependencies": {
+    "ol": "latest"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.0"
+  },
+  "browserslist": "defaults"
+}
