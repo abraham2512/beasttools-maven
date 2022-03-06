@@ -9,11 +9,11 @@ import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
 //#case classes
-case class File(filename:String, filetype:String, filesource:String, filestatus:String) {
-  def apply(filename:String,filetype:String,filesource:String,filestatus:String): File = { File(filename,filetype,filesource,filestatus)}
+case class DataFile(filename:String, filetype:String, filesource:String, filestatus:String) {
+  def apply(filename:String,filetype:String,filesource:String,filestatus:String): DataFile = { DataFile(filename,filetype,filesource,filestatus)}
 }
 
-final case class Files(files: Seq[File])
+final case class Files(files: Seq[DataFile])
 
 object FileRegistry {
   //#actor protocol
@@ -21,13 +21,13 @@ object FileRegistry {
   final case class FileActionPerformed(description:String)
 
   final case class GetFiles(replyTo: ActorRef[Files]) extends Command
-  final case class GetFile(filename: String,replyTo: ActorRef[File]) extends Command
+  final case class GetFile(filename: String,replyTo: ActorRef[DataFile]) extends Command
 
-  final case class CreateFile(file: File, replyTo: ActorRef[FileActionPerformed]) extends Command
-  final case class RunQuery(file:File,query:String,replyTo:ActorRef[FileActionPerformed]) extends Command
+  final case class CreateFile(file: DataFile, replyTo: ActorRef[FileActionPerformed]) extends Command
+  final case class RunQuery(file:DataFile, query:String, replyTo:ActorRef[FileActionPerformed]) extends Command
 
-  final case class SpeakToHDFS(listing: Listing,file: File) extends Command
-  final case class SpeakToQuery(listing: Listing,query:String,file: File) extends Command
+  final case class SpeakToHDFS(listing: Listing,file: DataFile) extends Command
+  final case class SpeakToQuery(listing: Listing,query:String,file: DataFile) extends Command
 
   final case class Error(error: String) extends Command
 
@@ -44,13 +44,13 @@ object FileRegistry {
           try {
             val f = DataFileDAL.get(filename)
             val file_data = f.get
-            val returnFile = File(file_data._1, file_data._2, file_data._3, file_data._4)
+            val returnFile = DataFile(file_data._1, file_data._2, file_data._3, file_data._4)
             replyTo ! returnFile
             Behaviors.same
           } catch {
             case e: NoSuchElementException =>
               println("FileRegistry: No Such Element" + e.toString)
-              replyTo ! File("", "", "", "")
+              replyTo ! DataFile("", "", "", "")
               Behaviors.same
 
           }
@@ -60,7 +60,7 @@ object FileRegistry {
         //GET ALL FILES implemented here
         case GetFiles(replyTo) =>
             val f: Seq[(String, String, String, String)] = DataFileDAL.get_all()
-            val files_data = f.map(f => File(f._1, f._2, f._3, f._4))
+            val files_data = f.map(f => DataFile(f._1, f._2, f._3, f._4))
             replyTo ! Files(files_data)
             println("FileRegistry: Database get all complete!")
             Behaviors.same

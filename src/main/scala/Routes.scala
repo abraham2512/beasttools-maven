@@ -8,8 +8,9 @@ import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.util.Timeout
 import FileRegistry._
 import TileActor._
-import akka.http.javadsl.server.PathMatcher4
 
+import scala.concurrent.duration.Duration
+import scala.reflect.io.File
 
 class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[TileActor.TileCommand])(implicit val system: ActorSystem[_]) {
 
@@ -22,32 +23,36 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
 
   def getFiles: Future[Files] =
     fileRegistry.ask(GetFiles)
-  def createFile(file: File): Future[FileActionPerformed] = {
+  def createFile(file: DataFile): Future[FileActionPerformed] = {
     println(system.printTree)
     fileRegistry.ask(CreateFile(file, _))
   }
-  def getFile(filename: String): Future[File] =
+  def getFile(filename: String): Future[DataFile] =
     fileRegistry.ask(GetFile(filename, _))
-  def getTile(tilename: String): Future[String] =
-    tileActor.ask(GetTile(tilename,_))
-
-
+  def getTile(dataset: String,tile: (String,String,String)): Future[String] =
+    tileActor.ask(GetTile(dataset,tile,_))
 
   private val tileOnTheFlyHandler = RejectionHandler.newBuilder
-    .handleNotFound { complete((StatusCodes.NotFound, "Going to get that on the fly!")) }
+    .handleNotFound { complete((StatusCodes.NotFound, "Error: Could not get tile on the fly!"))
+       }
     .handle { case ValidationRejection(msg, _) => complete((StatusCodes.InternalServerError, msg)) }
     .result()
 
 
-  //#all-routes
 
+  //#all-routes
   val fileRoutes: Route =
   /* ROUTES TO RETRIEVE TILES */
     pathPrefix("tiles"){
       handleRejections(tileOnTheFlyHandler){
         parameters("dataset","z","x","y") { (dataset,z,x,y) =>
-          println("viz/"+dataset+"/tile-"+z+"-"+x+"-"+y+".png")
-          getFromDirectory(directoryName="viz/"+dataset+"/tile-"+z+"-"+x+"-"+y+".png")
+          val resourcePath = "data/viz/"+dataset+"/"+"tile-"+z+"-"+x+"-"+y+".png"
+          if (File(resourcePath).exists) {
+            getFromDirectory(directoryName=resourcePath)
+          } else {
+            complete(getTile(dataset, (z,x,y)))
+          }
+          //getFromDirectory(directoryName=resourcePath)
         }
       }
     } ~
@@ -60,7 +65,7 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
               complete(getFiles)
             },
             post {
-              entity(as[File]) { file =>
+              entity(as[DataFile]) { file =>
                 onSuccess(createFile(file)) { performed =>
                   complete((StatusCodes.Created, performed))
                 }

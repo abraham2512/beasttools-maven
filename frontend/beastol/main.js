@@ -12,7 +12,7 @@ import VectorLayer from 'ol/layer/Vector';
 const my_layer = new TileLayer({
   source: new XYZ({
     url:
-      "http://127.0.0.1:8080/files/tiles/tile-{z}-{x}-{y}.png"
+      "http://127.0.0.1:8080/tiles/?dataset=SafetyDept&z={z}&x={x}&y={y}"
   }),
   
 });

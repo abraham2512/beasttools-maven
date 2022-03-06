@@ -19,7 +19,7 @@ object DataFileDAL {
       ).withPinnedSession)
     }
 
-    def insert(file: File): Unit = {
+    def insert(file: DataFile): Unit = {
       val f = db.run(DBIO.seq(
         dao.insert(file.filename,file.filetype,file.filesource,file.filestatus)
       ).withPinnedSession)
