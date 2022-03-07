@@ -9,9 +9,10 @@ import akka.util.Timeout
 import FileRegistry._
 import TileActor._
 
-import scala.concurrent.duration.Duration
 import scala.reflect.io.File
-
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.ContentTypes.NoContentType
+import akka.http.scaladsl.model.headers.`Content-Type`
 class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[TileActor.TileCommand])(implicit val system: ActorSystem[_]) {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -29,7 +30,7 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
   }
   def getFile(filename: String): Future[DataFile] =
     fileRegistry.ask(GetFile(filename, _))
-  def getTile(dataset: String,tile: (String,String,String)): Future[String] =
+  def getTile(dataset: String,tile: (String,String,String)): Future[Array[Byte]] =
     tileActor.ask(GetTile(dataset,tile,_))
 
   private val tileOnTheFlyHandler = RejectionHandler.newBuilder
@@ -37,8 +38,6 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
        }
     .handle { case ValidationRejection(msg, _) => complete((StatusCodes.InternalServerError, msg)) }
     .result()
-
-
 
   //#all-routes
   val fileRoutes: Route =
@@ -50,7 +49,11 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
           if (File(resourcePath).exists) {
             getFromDirectory(directoryName=resourcePath)
           } else {
-            complete(getTile(dataset, (z,x,y)))
+            onSuccess(getTile(dataset, (z,x,y))) { byteStream =>
+                val imageResponse = HttpEntity(MediaTypes.`image/png`,byteStream)
+                complete(StatusCodes.OK, imageResponse)
+
+            }
           }
           //getFromDirectory(directoryName=resourcePath)
         }

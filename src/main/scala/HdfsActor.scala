@@ -1,13 +1,12 @@
 
-import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
+import akka.actor.typed.Behavior
 import org.apache.spark.sql.SparkSession
 import edu.ucr.cs.bdlab.beast._
 import edu.ucr.cs.bdlab.beast.indexing.RSGrovePartitioner
-import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext, Behaviors}
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import edu.ucr.cs.bdlab.beast.common.BeastOptions
 import edu.ucr.cs.bdlab.davinci.{GeometricPlotter, MultilevelPlot}
-import org.geotools.referencing.operation.projection.Mercator
 
 
 object HdfsActor {
@@ -57,12 +56,14 @@ object HdfsActor {
           opts.set("mercator",true)
           opts.set("stroke", "blue")
           opts.set("data-tiles",true)
+          opts.set("iformat","rtree")
+          opts.set("data","../../indexed/" + file.filename)
           //opts.set("threshold","20m")
           //features.plotPyramid(outPath="viz/"+file.filename,numLevels = 4,opts = opts)
           val outPath="data/viz/"+file.filename
           val inputPath=" "
 
-          MultilevelPlot.plotFeatures(features, levels=0 until 16, classOf[GeometricPlotter], inputPath, outPath, opts)
+          MultilevelPlot.plotFeatures(features, levels=0 until 4, classOf[GeometricPlotter], inputPath, outPath, opts)
 
 
           println("HdfsRegistry: Multilevel indexing complete")
@@ -80,7 +81,7 @@ object HdfsActor {
             HDFSActionPerformed("Failure")
             Behaviors.same
         } finally {
-          println("Good Bye!")
+          //println("Good Bye!")
           spark.stop()
           HDFSActionPerformed("Exit")
           Behaviors.same
