@@ -63,7 +63,7 @@ object HdfsActor {
           val outPath="data/viz/"+file.filename
           val inputPath=" "
 
-          MultilevelPlot.plotFeatures(features, levels=0 until 4, classOf[GeometricPlotter], inputPath, outPath, opts)
+          MultilevelPlot.plotFeatures(features, levels=0 until 16, classOf[GeometricPlotter], inputPath, outPath, opts)
 
 
           println("HdfsRegistry: Multilevel indexing complete")
