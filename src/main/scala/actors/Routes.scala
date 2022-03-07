@@ -1,28 +1,33 @@
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.{RejectionHandler, Route, ValidationRejection}
+package actors
 
-import scala.concurrent.Future
+import actors.FileRegistry._
+import actors.TileActor._
 import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
 import akka.actor.typed.{ActorRef, ActorSystem}
-import akka.util.Timeout
-import FileRegistry._
-import TileActor._
-
-import scala.reflect.io.File
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.ContentTypes.NoContentType
-import akka.http.scaladsl.model.headers.`Content-Type`
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{RejectionHandler, Route, ValidationRejection}
+import akka.util.Timeout
+
+import scala.concurrent.Future
+import scala.reflect.io.File
+
+//#case classes
+case class DataFile(filename:String, filetype:String, filesource:String, filestatus:String) {
+  def apply(filename:String,filetype:String,filesource:String,filestatus:String): DataFile = { DataFile(filename,filetype,filesource,filestatus)}
+}
+final case class DataFiles(files: Seq[DataFile])
+
 class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[TileActor.TileCommand])(implicit val system: ActorSystem[_]) {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-  import JsonFormats._
+  import utils.JsonFormats._
 
   //#implicit default timeout value for all requests
   private implicit val timeout: Timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
 
 
-  def getFiles: Future[Files] =
+  def getFiles: Future[DataFiles] =
     fileRegistry.ask(GetFiles)
   def createFile(file: DataFile): Future[FileActionPerformed] = {
     println(system.printTree)
@@ -50,12 +55,9 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
             getFromDirectory(directoryName=resourcePath)
           } else {
             onSuccess(getTile(dataset, (z,x,y))) { byteStream =>
-                val imageResponse = HttpEntity(MediaTypes.`image/png`,byteStream)
-                complete(StatusCodes.OK, imageResponse)
-
+                complete(StatusCodes.OK, HttpEntity(MediaTypes.`image/png`,byteStream))
             }
           }
-          //getFromDirectory(directoryName=resourcePath)
         }
       }
     } ~

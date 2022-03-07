@@ -1,3 +1,4 @@
+import actors.{FileRegistry, HdfsActor, Routes, TileActor}
 import akka.actor.typed.{ActorSystem, MailboxSelector}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
@@ -17,6 +18,7 @@ object StartApp {
       case Success(binding) =>
         val address = binding.localAddress
         system.log.info("Server online at http://{}:{}/", address.getHostString, address.getPort)
+        println("Server online at http://{}:{}/", address.getHostString, address.getPort)
       case Failure(ex) =>
         system.log.error("Failed to bind HTTP endpoint, terminating system", ex)
         system.terminate()
@@ -29,23 +31,17 @@ object StartApp {
         //val props = MailboxSelector.defaultMailbox()
         val fileRegistryActor = context.spawn(FileRegistry(),name="FileRegistryActor",MailboxSelector.bounded(capacity = 100))
         context.watch(fileRegistryActor)
-
         val tileActor = context.spawn(TileActor(), name="TileActor",MailboxSelector.bounded(capacity = 100))
         context.watch(tileActor)
+        val hdfsActor = context.spawn(HdfsActor(),name="HdfsActor",MailboxSelector.bounded(capacity = 100))
+        context.watch(hdfsActor)
+
         val routes = new Routes(fileRegistryActor,tileActor)(context.system)
         startHttpServer(routes.fileRoutes)(context.system)
-
-        val hdfsRegistryActor = context.spawn(HdfsActor(),name="HdfsRegistryActor",MailboxSelector.bounded(capacity = 100))
-        context.watch(hdfsRegistryActor)
         Behaviors.empty
       }
-    try {
       val system = ActorSystem[Nothing](rootBehavior, "BeastAkkaServer")
       //#server-bootstrapping
-    }catch {
-      case e:Exception =>
-        println(e.toString)
-    }
   }
 }
 //#main-class

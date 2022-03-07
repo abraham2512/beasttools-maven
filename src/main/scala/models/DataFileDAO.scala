@@ -1,3 +1,5 @@
+package models
+
 import slick.jdbc.JdbcProfile
 
 class DataFileDAO(val profile: JdbcProfile) {
@@ -19,8 +21,6 @@ class DataFileDAO(val profile: JdbcProfile) {
   def create: DBIO[Unit] =
     props.schema.create
 
-  //val insertQuery = props returning props.map(_.id) into ((item, id) => item.copy(id = id))
-
   /** Insert a key/value pair */
   def insert(filename: String, filetype:String, filesource: String, filestatus: String): DBIO[Int] =
     props += (filename,filetype,filesource,filestatus)
@@ -41,7 +41,7 @@ class DataFileDAO(val profile: JdbcProfile) {
   //def delete(filename: String): DBIO[Int] =
 
   /** Get the first element for a Query from this DAO */
-  def getFirst[M, U, C[_]](q: Query[M, U, C]): DBIO[U] =
-    q.result.head
+//  def getFirst[M, U, C[_]](q: Query[M, U, C]): DBIO[U] =
+//    q.result.head
 
 }
