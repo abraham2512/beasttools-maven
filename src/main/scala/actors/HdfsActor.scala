@@ -10,13 +10,12 @@ import edu.ucr.cs.bdlab.beast.indexing.RSGrovePartitioner
 import edu.ucr.cs.bdlab.davinci.{GeometricPlotter, MultilevelPlot}
 import org.apache.spark.sql.SparkSession
 
-
 object HdfsActor {
   val HdfsKey: ServiceKey[HdfsCommand] = ServiceKey("HDFS_ACTOR")
 
   sealed trait HdfsCommand
-
   final case class HDFSActionPerformed(description: String) extends HdfsCommand
+
   final case class PartitionToHDFS(file: DataFile) extends HdfsCommand
   final case class SpeakText(msg: String) extends HdfsCommand
 
@@ -56,7 +55,7 @@ object HdfsActor {
             opts.set("data-tiles", true)
             opts.set("iformat", "rtree")
             opts.set("data", "../../indexed/" + file.filename)
-            //opts.set("threshold","20m")
+            //opts.set("threshold","1m")
             val outPath = "data/viz/" + file.filename
             val inputPath = " "
             MultilevelPlot.plotFeatures(features, levels = 0 until 16, classOf[GeometricPlotter], inputPath, outPath, opts)

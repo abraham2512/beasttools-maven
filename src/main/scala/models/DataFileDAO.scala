@@ -19,7 +19,7 @@ class DataFileDAO(val profile: JdbcProfile) {
 
   /** Create the database schema */
   def create: DBIO[Unit] =
-    props.schema.create
+    props.schema.createIfNotExists
 
   /** Insert a key/value pair */
   def insert(filename: String, filetype:String, filesource: String, filestatus: String): DBIO[Int] =

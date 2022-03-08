@@ -13,8 +13,7 @@ object DataFileDAL {
   private val db = Database.forConfig("h2")
 
   def apply(): Unit = {
-    val f = create_db()
-    Await.result(f, Duration.Inf)
+    Await.result(create_db(), Duration.Inf)
   }
 
   def create_db(): Future[Unit] = {

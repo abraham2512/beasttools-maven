@@ -6,11 +6,8 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.util.Timeout
 import models.DataFileDAL
-
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
-
-
 
 object FileRegistry {
   //#actor protocol
@@ -68,8 +65,6 @@ object FileRegistry {
             replyTo ! DataFiles(files_data)
             println("actors.FileRegistry: Database get all complete!")
           Behaviors.same
-
-
 
         //MESSAGE TO HDFS ACTOR
         case SendHadoopTask(listing,file) =>
