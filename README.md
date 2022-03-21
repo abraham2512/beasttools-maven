@@ -15,7 +15,7 @@ Project can be started using StartApp main class, run with intelliJ to bundle ma
 
 ### API Endpoints
 
-* Get details of file GET->  http://127.0.0.1:8080/files/<filename>
+* Get details of file GET->  http://127.0.0.1:8080/files/filename
 * Load a dataset into beast POST -> http://127.0.0.1:8080/files
     with body containing a json like
  {
@@ -25,7 +25,7 @@ Project can be started using StartApp main class, run with intelliJ to bundle ma
   "filestatus": "start"
   }
 * Fetch a pre-generated tile or generate one on the fly 
-    GET-> http://127.0.0.1:8080/tiles/?dataset=<dataset-name>&z=<Z-value>&x=<X-value>&y=<Y-value>
+    GET-> http://127.0.0.1:8080/tiles/?dataset=<dataset-name>&z=Z-value&x=X-value&y=Y-value
 
 
 ### Pending work
