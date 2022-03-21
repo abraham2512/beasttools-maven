@@ -4,6 +4,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 
+import scala.reflect.io.File
 import scala.util.{Failure, Success}
 
 //#main-class
@@ -29,6 +30,8 @@ object StartApp {
     //#server-bootstrapping
       val rootBehavior = Behaviors.setup[Nothing] { context =>
         //val props = MailboxSelector.defaultMailbox()
+        //println("Pre Actors Routine")
+        //if (File("application.conf").exists) println("FOUND APP CONF") else println("NOPE")
         val fileRegistryActor = context.spawn(FileRegistry(),name="FileRegistryActor",MailboxSelector.bounded(capacity = 100))
         context.watch(fileRegistryActor)
         val tileActor = context.spawn(TileActor(), name="TileActor",MailboxSelector.bounded(capacity = 100))
