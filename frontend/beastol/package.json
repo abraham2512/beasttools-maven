@@ -7,13 +7,14 @@
     "build": "parcel build --public-url . index.html"
   },
   "dependencies": {
-    "ol": "latest",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "axios": "^0.26.1",
+    "jquery": "^3.6.0",
+    "node-fetch": "^3.2.3",
+    "ol": "latest"
   },
   "devDependencies": {
     "parcel": "^2.0.0",
-    "parcel-bundler": "^1.12.5"
+    "parcel-bundler": "^1.3.1"
   },
   "browserslist": "defaults"
 }

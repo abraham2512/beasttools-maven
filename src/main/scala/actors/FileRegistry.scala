@@ -30,6 +30,8 @@ object FileRegistry {
       Behaviors.receiveMessage {
         // CREATE FILE implemented here
         case CreateFile(file, replyTo) =>
+          //TODO CHECK IF FILE EXISTS IN DB
+
           println("actors.FileRegistry: Inserted file, queuing spark download")
           DataFileDAL.insert(file)
           implicit val timeout: Timeout = 1.second
