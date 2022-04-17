@@ -18,6 +18,8 @@ object FileRegistry {
   final case class CreateFile(file: DataFile, replyTo: ActorRef[FileActionPerformed]) extends Command
   final case class GetFiles(replyTo: ActorRef[DataFiles]) extends Command
   final case class GetFile(filename: String,replyTo: ActorRef[DataFile]) extends Command
+  final case class DeleteFile(filename: String, replyTo: ActorRef[FileActionPerformed]) extends Command
+
   final case class SendHadoopTask(listing: Listing, file: DataFile) extends Command
 
   def apply(): Behavior[Command]  = Behaviors.setup {
@@ -76,6 +78,11 @@ object FileRegistry {
             println("actors.FileRegistry: Database get all complete!")
           Behaviors.same
 
+        case DeleteFile(filename,replyTo) =>
+          DataFileDAL.delete_file(filename)
+          println("File Deleted")
+          replyTo ! FileActionPerformed("deleted")
+          Behaviors.same
         //MESSAGE TO HDFS ACTOR
         case SendHadoopTask(listing,file) =>
           println("actors.FileRegistry: Sending a SendHadoopTask message")

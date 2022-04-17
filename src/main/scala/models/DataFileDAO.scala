@@ -38,7 +38,9 @@ class DataFileDAO(val profile: JdbcProfile) {
     q.update(filestatus)
   }
 
-  //def delete(filename: String): DBIO[Int] =
+  def delete(filename: String): DBIO[Int] = {
+    props.filter(_.filename === filename).delete
+  }
 
   /** Get the first element for a Query from this DAO */
 //  def getFirst[M, U, C[_]](q: Query[M, U, C]): DBIO[U] =

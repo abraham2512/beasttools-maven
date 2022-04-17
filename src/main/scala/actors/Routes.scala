@@ -34,6 +34,9 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
     println(system.printTree)
     fileRegistry.ask(CreateFile(file, _))
   }
+  def deleteFile(filename:String): Future[FileActionPerformed] = {
+    fileRegistry.ask(DeleteFile(filename,_))
+  }
   def getFile(filename: String): Future[DataFile] =
     fileRegistry.ask(GetFile(filename, _))
   def getTile(dataset: String,tile: (String,String,String)): Future[Array[Byte]] =
@@ -100,6 +103,13 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
                     get {
                       rejectEmptyResponse {
                         onSuccess(getFile(filename)) { response =>
+                          complete(StatusCodes.OK, response)
+                        }
+                      }
+                    },
+                    delete {
+                      rejectEmptyResponse {
+                        onSuccess(deleteFile(filename)) { response =>
                           complete(StatusCodes.OK, response)
                         }
                       }

@@ -44,5 +44,8 @@ object DataFileDAL {
     val update = db.run(dao.update_status(filename, filestatus).withPinnedSession)
     Await.result(update, Duration.Inf)
   }
-
+  def delete_file(filename:String) :Int = {
+    val delete = db.run(dao.delete(filename).withPinnedSession)
+    Await.result(delete,Duration.Inf)
+  }
 }
