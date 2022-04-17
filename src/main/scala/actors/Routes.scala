@@ -87,7 +87,7 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
                     post {
                       entity(as[DataFile]) { file =>
                         onSuccess(createFile(file)) { performed =>
-                          complete((StatusCodes.Created, performed))
+                          complete((StatusCodes.OK, performed))
                         }
                       }
 

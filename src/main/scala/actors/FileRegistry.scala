@@ -30,20 +30,28 @@ object FileRegistry {
       Behaviors.receiveMessage {
         // CREATE FILE implemented here
         case CreateFile(file, replyTo) =>
-          //TODO CHECK IF FILE EXISTS IN DB
-
-          println("actors.FileRegistry: Inserted file, queuing spark download")
-          DataFileDAL.insert(file)
-          implicit val timeout: Timeout = 1.second
-          context.ask(context.system.receptionist,Find(HdfsActor.HdfsKey))
-          {
-            case Success(listing:Listing) =>
-              FileRegistry.SendHadoopTask(listing,file)
-            case Failure(_)=>
-              FileRegistry.Error("No HDFS Actor")
+          //CHECK IF FILE EXISTS IN DB
+          val f: Seq[(String, String, String, String)] = DataFileDAL.get_all()
+          val files = f.map(f => f._1)
+          if(files contains(file.filename)){
+            println("actors.FileRegistry: File exists, doing nothing")
+            replyTo ! FileActionPerformed(s"exists")
           }
-          replyTo ! FileActionPerformed(s"File ${file.filename} created!")
-          println("actors.FileRegistry: Database insert complete!")
+          else {
+            println("actors.FileRegistry: Inserted file, queuing spark download")
+            DataFileDAL.insert(file)
+            implicit val timeout: Timeout = 1.second
+            context.ask(context.system.receptionist,Find(HdfsActor.HdfsKey))
+            {
+              case Success(listing:Listing) =>
+                FileRegistry.SendHadoopTask(listing,file)
+              case Failure(_)=>
+                FileRegistry.Error("No HDFS Actor")
+            }
+            replyTo ! FileActionPerformed(s"created")
+            println("actors.FileRegistry: Database insert complete!")
+          }
+
           Behaviors.same
 
         //GET FILE Implemented here
