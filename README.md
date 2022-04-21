@@ -30,8 +30,7 @@ Project can be started using StartApp main class, run with intelliJ to bundle ma
 
 ### Pending work
 
-* Unit tests not possible in akka, need to include some integration test
-* DELETE endpoint to remove file
+* Unit tests not possible in akka, need to integrate actors and test them together
 * Fix maven build issue when building uber-jar
 
 ## Authors
