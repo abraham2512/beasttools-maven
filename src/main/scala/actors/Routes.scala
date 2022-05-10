@@ -6,7 +6,7 @@ import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{Directive0, ExceptionHandler, RejectionHandler, Route, ValidationRejection}
+import akka.http.scaladsl.server.{ExceptionHandler, RejectionHandler, Route, ValidationRejection}
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives
 
@@ -27,21 +27,27 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
   //#implicit default timeout value for all requests
   private implicit val timeout: Timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
 
-
+  //The methods below send messages to actors respective to the API request
   def getFiles: Future[DataFiles] =
     fileRegistry.ask(GetFiles)
-  def createFile(file: DataFile): Future[FileActionPerformed] = {
-    println(system.printTree)
+
+  def createFile(file: DataFile): Future[FileActionPerformed] =
     fileRegistry.ask(CreateFile(file, _))
-  }
-  def deleteFile(filename:String): Future[FileActionPerformed] = {
+
+  def deleteFile(filename:String): Future[FileActionPerformed] =
     fileRegistry.ask(DeleteFile(filename,_))
-  }
+
   def getFile(filename: String): Future[DataFile] =
     fileRegistry.ask(GetFile(filename, _))
+
   def getTile(dataset: String,tile: (String,String,String)): Future[Array[Byte]] =
     tileActor.ask(GetTile(dataset,tile,_))
 
+  def getTileMeta(dataset: String, mbrString: String): Future[String] =
+    tileActor.ask(GetMetaData(dataset,mbrString,_))
+
+
+  //This function handles situations when the tile could not be generated on the fly
   private val tileOnTheFlyHandler = RejectionHandler.newBuilder
     .handleNotFound { complete((StatusCodes.NotFound, "Error: Could not get tile on the fly!"))
        }
@@ -64,6 +70,16 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
     handleErrors{
       cors(){
         handleErrors {
+          pathPrefix("meta"){
+            pathEnd {
+              get{
+                parameters("dataset","mbrString"){(dataset,mbrString) =>
+                  onSuccess(getTileMeta(dataset,mbrString)) { metadata =>
+                    complete(StatusCodes.OK,metadata)
+                  }
+                }
+              }}
+          } ~
           pathPrefix("tiles"){
             handleRejections(tileOnTheFlyHandler){
               parameters("dataset","z","x","y") { (dataset,z,x,y) =>
