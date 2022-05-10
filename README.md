@@ -2,21 +2,24 @@
 
 Akka Actors and Akka HTTP based microservice built for distributed processing and visualization of geo-spatial data using the BEAST library for geospatial data
 
+For more documentation, please check this link https://abraham2512.github.io/beastapi-docs/
+
 ### Dependencies
 
-Scala 2.12 and Spark 3.0.3 are the only requirements. Other dependencies in pom.xml
+Java 1.8, Scala 2.12 and Spark 3.0
 
-### Installing
-* Use Maven to build dependencies
-* Create the folder data with sub-folders indexed and viz
-
-### Executing program
-Project can be started using StartApp main class, run with intelliJ to bundle maven dependencies
+### Instructions to setup development environment
+* Open with IntelliJ and use Maven to compile 
+* Create an empty folder "data" with sub-folders "indexed" and "viz"
+* Start Backend -> Edit configurations to use StartApp as main class and run as java 8 Application. No arguments.
+* Start Frontend -> cd into frontend/beastol/ and run `npm run start`
 
 ### API Endpoints
-
+* Get all files GET-> http://127.0.0.1:8080/files
 * Get details of file GET->  http://127.0.0.1:8080/files/filename
-* Load a dataset into beast POST -> http://127.0.0.1:8080/files
+* Delete a file DELETE-> http://127.0.0.1:8080/files/filename
+
+* Load a file into beast POST -> http://127.0.0.1:8080/files
     with body containing a json like
  {
   "filename": "SafetyDept",
@@ -30,7 +33,7 @@ Project can be started using StartApp main class, run with intelliJ to bundle ma
 
 ### Pending work
 
-* Unit tests not possible in akka, need to integrate actors and test them together
+* Integration tests with all actors and test them together
 * Fix maven build issue when building uber-jar
 
 ## Authors
