@@ -1,6 +1,6 @@
 # Beast Microservice
 
-Akka Actors and Akka HTTP based microservice built for distributed processing and visualization of geo-spatial data using the BEAST library for geospatial data
+Akka Actors and Akka HTTP based microservice built for distributed processing and visualization of geo-spatial data using the [BEAST](https://bitbucket.org/bdlabucr/beast/src/master/) library
 
 For more documentation, please check this link https://abraham2512.github.io/beastapi-docs/
 
