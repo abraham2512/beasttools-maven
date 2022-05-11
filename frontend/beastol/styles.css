@@ -16,7 +16,7 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 30%;
+    width: 20%;
     height: 100vh;  
     display: block;
     background-color: #2C2C2B; 
@@ -25,13 +25,13 @@ html, body {
     }
 
 .child2 {
-    width: 70%;
+    width: 80%;
     /* padding: 30px; */
     /* height: 100vh;
     border: green solid 5px;
     margin: 50px; */
 }
-.card {
+.my_card {
 /* Add shadows to create the "card" effect */
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
     transition: 0.3s;
@@ -40,7 +40,7 @@ html, body {
 }
 
 /* On mouse-over, add a deeper shadow */
-.card:hover {
+.my_card:hover {
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 }
   
