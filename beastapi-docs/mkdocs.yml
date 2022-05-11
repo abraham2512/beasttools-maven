@@ -1,0 +1,11 @@
+site_name: BeastApi-Docs
+
+nav:
+    - Home: index.md
+    - Overview: overview.md
+    - Backend: backend.md
+    - Frontend: frontend.md
+    - Example1 /meta/: api_example.md
+    - Example2 OL event: ol_example.md
+    - Example3 Accessing H2DB: h2db_example.md
+theme: readthedocs
