@@ -5,14 +5,19 @@ Akka Actors and Akka HTTP based microservice built for distributed processing an
 For more documentation, please check this link https://abraham2512.github.io/beastapi-docs/
 
 ### Dependencies
-
-Java 1.8, Scala 2.12 and Spark 3.0
+* JDK 8 
+* Maven 
+* Scala 2.12
+* Spark 3.0
+* NodeJS
 
 ### Instructions to setup development environment
 * Open with IntelliJ and use Maven to compile 
 * Create an empty folder "data" with sub-folders "indexed" and "viz"
 * Start Backend -> Edit configurations to use StartApp as main class and run as java 8 Application. No arguments.
-* Start Frontend -> cd into frontend/beastol/ and run `npm run start`
+cd into frontend/beastol/ and install dependencies with `npm install`
+* Start Frontend -> run `npm run start`
+* 
 
 ### API Endpoints
 * Get all files GET-> http://127.0.0.1:8080/files
