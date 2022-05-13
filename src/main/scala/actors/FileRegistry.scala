@@ -6,6 +6,8 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.util.Timeout
 import models.DataFileDAL
+import org.apache.commons.io.FileUtils
+import java.io.{File, FileNotFoundException}
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
@@ -80,7 +82,19 @@ object FileRegistry {
 
         case DeleteFile(filename,replyTo) =>
           DataFileDAL.delete_file(filename)
-          println("File Deleted")
+          //println("File Deleted")
+          val indexpath = "data/indexed/"+filename
+          val vizpath = "data/viz/"+filename
+
+          try {
+            FileUtils.deleteDirectory(new File(indexpath))
+            FileUtils.deleteDirectory(new File(vizpath))
+          } catch {
+            case e: FileNotFoundException =>
+              println("actors.FileRegistry: File doesnt exist" + e.toString)
+          } finally {
+            println(s"actors.FileRegistry: $filename deleted")
+          }
           replyTo ! FileActionPerformed("deleted")
           Behaviors.same
         //MESSAGE TO HDFS ACTOR
@@ -89,7 +103,7 @@ object FileRegistry {
           val instances: Set[ActorRef[HdfsActor.HdfsCommand]] =
             listing.serviceInstances(HdfsActor.HdfsKey)
           hdfsActor = instances.headOption
-          println(hdfsActor)
+          //println(hdfsActor)
           hdfsActor.foreach { m =>
             m ! HdfsActor.PartitionToHDFS(file)
           }
