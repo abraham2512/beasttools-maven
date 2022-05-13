@@ -10,6 +10,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{IntegerType, StringType}
+import utils.SparkFactory.sc
 
 object TileActor {
   sealed trait TileCommand
@@ -23,13 +24,13 @@ object TileActor {
       println("actors.TileActor: Listening for tiles to generate")
       Behaviors.receiveMessage {
         case GetTile(dataset, (z, x, y), replyTo) =>
-          val spark = SparkSession
-            .builder
-            .appName("HdfsTest") //.config(conf)
-            .master("local[*]").getOrCreate()
-          val sc = spark.sparkContext
-          println("actors.TileActor: Spark session started!")
           try {
+//            val spark = SparkSession
+//              .builder
+//              .appName("HdfsTest") //.config(conf)
+//              .master("local[*]").getOrCreate()
+//            val sc = spark.sparkContext
+            println("actors.TileActor: Spark session started!")
             println("actors.TileActor: Starting tile plot for tile-" + z + "-" + x + "-" + y)
 
             val tileID = TileIndex.encode(z.toInt, x.toInt, y.toInt)
@@ -45,18 +46,18 @@ object TileActor {
             replyTo ! interimOutput.toByteArray
 
           } catch {
-            case _: Throwable => println("ERROR" + _)
+            case e: Exception => println("actors.TileActor: ERROR : " + e.toString)
           } finally {
             //spark.stop() //Do not stop spark as other actor threads might be using
           }
           Behaviors.same
 
         case GetMetaData(dataset: String, mbrString:String,replyTo) =>
-          val spark = SparkSession
-            .builder
-            .appName("HdfsTest")
-            .master("local[*]").getOrCreate()
-          val sc = spark.sparkContext
+//          val spark = SparkSession
+//            .builder
+//            .appName("HdfsTest")
+//            .master("local[*]").getOrCreate()
+//          val sc = spark.sparkContext
           val opts = new BeastOptions(loadDefaults = false)
           val datapath = "data/indexed/"+dataset
           val featureReaderClass = SpatialFileRDD.getFeatureReaderClass(datapath,opts)

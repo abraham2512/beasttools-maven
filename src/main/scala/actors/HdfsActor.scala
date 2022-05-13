@@ -9,6 +9,7 @@ import edu.ucr.cs.bdlab.beast.common.BeastOptions
 import edu.ucr.cs.bdlab.beast.indexing.RSGrovePartitioner
 import edu.ucr.cs.bdlab.davinci.{GeometricPlotter, MultilevelPlot}
 import org.apache.spark.sql.SparkSession
+import utils.SparkFactory.sc
 
 object HdfsActor {
   val HdfsKey: ServiceKey[HdfsCommand] = ServiceKey("HDFS_ACTOR")
@@ -32,11 +33,11 @@ object HdfsActor {
 
         case PartitionToHDFS(file) =>
 
-          val spark = SparkSession
-            .builder
-            .appName("HdfsTest")
-            .master("local[*]").getOrCreate()
-          val sc = spark.sparkContext
+//          val spark = SparkSession
+//            .builder
+//            .appName("HdfsTest")
+//            .master("local[*]").getOrCreate()
+//          val sc = spark.sparkContext
           try {
             println("actors.HdfsActor: Started partition job for file " + file.filename)
             DataFileDAL.update_status(file.filename, filestatus = "downloading")
