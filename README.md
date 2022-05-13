@@ -12,10 +12,15 @@ For more documentation, please check this link https://abraham2512.github.io/bea
 * NodeJS
 
 ### Instructions to setup development environment
+#### Step 1 : Start Backend
 * Open with IntelliJ and use Maven to compile 
 * Create an empty folder "data" with sub-folders "indexed" and "viz"
-* Start Backend -> Edit configurations to use StartApp as main class and run as java 8 Application. No arguments.
-cd into frontend/beastol/ and install dependencies with `npm install`
+* Start Backend -> Edit configurations to use StartApp as main class to run as java 8 Application. 
+
+#### Step 2 : Start Frontend
+* cd into frontend/beastol/ and install dependencies with `npm install`
+
+* 
 * Start Frontend -> run `npm run start`
 * 
 
