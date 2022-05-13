@@ -31,6 +31,7 @@ object HdfsActor {
           Behaviors.same
 
         case PartitionToHDFS(file) =>
+
           val spark = SparkSession
             .builder
             .appName("HdfsTest")
@@ -76,7 +77,7 @@ object HdfsActor {
               Behaviors.same
           } finally {
             //println("Good Bye!")
-            spark.stop()
+            //spark.stop()
             HDFSActionPerformed("Exit")
             Behaviors.same
           }

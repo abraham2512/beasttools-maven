@@ -23,10 +23,9 @@ object TileActor {
       println("actors.TileActor: Listening for tiles to generate")
       Behaviors.receiveMessage {
         case GetTile(dataset, (z, x, y), replyTo) =>
-          //          println("Received message!")
           val spark = SparkSession
             .builder
-            .appName("HdfsTest")
+            .appName("HdfsTest") //.config(conf)
             .master("local[*]").getOrCreate()
           val sc = spark.sparkContext
           println("actors.TileActor: Spark session started!")
@@ -48,7 +47,7 @@ object TileActor {
           } catch {
             case _: Throwable => println("ERROR" + _)
           } finally {
-            spark.stop()
+            //spark.stop() //Do not stop spark as other actor threads might be using
           }
           Behaviors.same
 
@@ -63,8 +62,6 @@ object TileActor {
           val featureReaderClass = SpatialFileRDD.getFeatureReaderClass(datapath,opts)
           println(featureReaderClass)
           val partitions = SpatialFileRDD.createPartitions(datapath, opts,sc.hadoopConfiguration)
-
-
 
           println(dataset+"->"+mbrString)
 
@@ -120,12 +117,9 @@ object TileActor {
           print(return_map.mkString("{",",","}"))
           import org.json4s.native.Json
           import org.json4s.DefaultFormats
-
           //GET METADATA
           replyTo ! Json(DefaultFormats).write(return_map)
           Behaviors.same
-
-
         case _ => println("default case")
           Behaviors.same
       }
