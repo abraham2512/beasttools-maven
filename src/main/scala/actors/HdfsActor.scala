@@ -71,8 +71,8 @@ object HdfsActor {
               println("actors.HdfsActor: Could not get spark session" + e.toString)
               HDFSActionPerformed("Failure")
               Behaviors.same
-            case _: Exception =>
-              println("Error" + _)
+            case e: Exception =>
+              println("Error" + e.toString)
               DataFileDAL.update_status(file.filename, filestatus = "error")
               HDFSActionPerformed("Failure")
               Behaviors.same
