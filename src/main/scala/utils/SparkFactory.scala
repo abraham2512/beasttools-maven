@@ -1,5 +1,6 @@
 package utils
 
+import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSession
 
 object SparkFactory {
@@ -7,5 +8,5 @@ object SparkFactory {
     .builder
     .appName("HdfsTest") //.config(conf)
     .master("local[*]").getOrCreate()
-  val sc = spark.sparkContext
+  val sc:SparkContext = spark.sparkContext
 }

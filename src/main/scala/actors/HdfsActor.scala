@@ -8,14 +8,14 @@ import edu.ucr.cs.bdlab.beast.{ReadWriteMixinFunctions, SpatialRDD}
 import edu.ucr.cs.bdlab.beast.common.BeastOptions
 import edu.ucr.cs.bdlab.beast.indexing.RSGrovePartitioner
 import edu.ucr.cs.bdlab.davinci.{GeometricPlotter, MultilevelPlot}
-import org.apache.spark.sql.SparkSession
 import utils.SparkFactory.sc
 
 object HdfsActor {
-  val HdfsKey: ServiceKey[HdfsCommand] = ServiceKey("HDFS_ACTOR")
 
   sealed trait HdfsCommand
   final case class HDFSActionPerformed(description: String) extends HdfsCommand
+
+  val HdfsKey: ServiceKey[HdfsCommand] = ServiceKey("HDFS_ACTOR")
 
   final case class PartitionToHDFS(file: DataFile) extends HdfsCommand
   final case class SpeakText(msg: String) extends HdfsCommand
@@ -33,11 +33,6 @@ object HdfsActor {
 
         case PartitionToHDFS(file) =>
 
-//          val spark = SparkSession
-//            .builder
-//            .appName("HdfsTest")
-//            .master("local[*]").getOrCreate()
-//          val sc = spark.sparkContext
           try {
             println("actors.HdfsActor: Started partition job for file " + file.filename)
             DataFileDAL.update_status(file.filename, filestatus = "downloading")
@@ -73,7 +68,7 @@ object HdfsActor {
               Behaviors.same
             case e: Exception =>
               println("Error" + e.toString)
-              DataFileDAL.update_status(file.filename, filestatus = "error")
+              DataFileDAL.update_status(file.filename, filestatus = "Partitioning error, check log")
               HDFSActionPerformed("Failure")
               Behaviors.same
           } finally {

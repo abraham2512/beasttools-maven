@@ -4,7 +4,6 @@ import akka.actor.typed.{ActorSystem, MailboxSelector}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
-
 import scala.reflect.io.File
 import scala.util.{Failure, Success}
 
@@ -45,6 +44,7 @@ object StartApp {
         Behaviors.empty
       }
       val system = ActorSystem[Nothing](rootBehavior, "BeastAkkaServer")
+      system.printTree
       //#server-bootstrapping
   }
 }

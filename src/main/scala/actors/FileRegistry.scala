@@ -2,11 +2,13 @@ package actors
 
 //#file-registry-actor
 import akka.actor.typed.receptionist.Receptionist.{Find, Listing}
+import akka.actor.typed.receptionist.ServiceKey
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.util.Timeout
 import models.DataFileDAL
 import org.apache.commons.io.FileUtils
+
 import java.io.{File, FileNotFoundException}
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
@@ -15,7 +17,10 @@ object FileRegistry {
   //#actor protocol
   sealed trait Command
   final case class FileActionPerformed(description:String) extends Command
-  final case class Error(error: String) extends Command
+
+  val FileKey: ServiceKey[Command] = ServiceKey("FILE_ACTOR")
+
+  //final case class Error(error: String) extends Command
 
   final case class CreateFile(file: DataFile, replyTo: ActorRef[FileActionPerformed]) extends Command
   final case class GetFiles(replyTo: ActorRef[DataFiles]) extends Command
@@ -37,7 +42,7 @@ object FileRegistry {
           //CHECK IF FILE EXISTS IN DB
           val f: Seq[(String, String, String, String)] = DataFileDAL.get_all()
           val files = f.map(f => f._1)
-          if(files contains(file.filename)){
+          if(files contains file.filename){
             println("actors.FileRegistry: File exists, doing nothing")
             replyTo ! FileActionPerformed(s"exists")
           }
@@ -50,7 +55,7 @@ object FileRegistry {
               case Success(listing:Listing) =>
                 FileRegistry.SendHadoopTask(listing,file)
               case Failure(_)=>
-                FileRegistry.Error("No HDFS Actor")
+                FileRegistry.FileActionPerformed("No HDFS Actor, could not download dataset")
             }
             replyTo ! FileActionPerformed(s"created")
             println("actors.FileRegistry: Database insert complete!")

@@ -1,5 +1,6 @@
 package actors
 
+import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 import edu.ucr.cs.bdlab.beast.common.BeastOptions
@@ -8,31 +9,32 @@ import edu.ucr.cs.bdlab.beast.io.SpatialFileRDD
 import edu.ucr.cs.bdlab.davinci.{MultilevelPyramidPlotHelper, TileIndex}
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.hadoop.fs.Path
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{IntegerType, StringType}
 import utils.SparkFactory.sc
+import org.json4s.native.Json
+import org.json4s.DefaultFormats
 
 object TileActor {
+
   sealed trait TileCommand
   final case class TileActionPerformed(description: String)
+
+  val TileKey: ServiceKey[TileCommand] = ServiceKey("TILE_ACTOR")
+
   final case class GetTile(dataset: String, tile: (String, String, String), replyTo: ActorRef[Array[Byte]]) extends TileCommand
   final case class GetMetaData(dataset: String, mbrString: String, replyTo: ActorRef[String]) extends TileCommand
 
 
   def apply(): Behavior[TileCommand] = Behaviors.setup {
     context: ActorContext[TileCommand] =>
+      context.system.receptionist ! Receptionist.Register(TileKey, context.self)
       println("actors.TileActor: Listening for tiles to generate")
+
       Behaviors.receiveMessage {
         case GetTile(dataset, (z, x, y), replyTo) =>
           try {
-//            val spark = SparkSession
-//              .builder
-//              .appName("HdfsTest") //.config(conf)
-//              .master("local[*]").getOrCreate()
-//            val sc = spark.sparkContext
             println("actors.TileActor: Spark session started!")
             println("actors.TileActor: Starting tile plot for tile-" + z + "-" + x + "-" + y)
-
             val tileID = TileIndex.encode(z.toInt, x.toInt, y.toInt)
             val tileIndexPath = new Path("data/indexed", dataset)
             val tileVizPath = new Path("data/viz", dataset)
@@ -53,19 +55,12 @@ object TileActor {
           Behaviors.same
 
         case GetMetaData(dataset: String, mbrString:String,replyTo) =>
-//          val spark = SparkSession
-//            .builder
-//            .appName("HdfsTest")
-//            .master("local[*]").getOrCreate()
-//          val sc = spark.sparkContext
           val opts = new BeastOptions(loadDefaults = false)
           val datapath = "data/indexed/"+dataset
           val featureReaderClass = SpatialFileRDD.getFeatureReaderClass(datapath,opts)
           println(featureReaderClass)
           val partitions = SpatialFileRDD.createPartitions(datapath, opts,sc.hadoopConfiguration)
-
           println(dataset+"->"+mbrString)
-
           var mbrs:Array[EnvelopeNDLite] = null
           var mbr:EnvelopeNDLite = null
 
@@ -116,8 +111,6 @@ object TileActor {
             }
           }
           print(return_map.mkString("{",",","}"))
-          import org.json4s.native.Json
-          import org.json4s.DefaultFormats
           //GET METADATA
           replyTo ! Json(DefaultFormats).write(return_map)
           Behaviors.same

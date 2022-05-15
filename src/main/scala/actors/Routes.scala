@@ -106,7 +106,7 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
                     post {
                       entity(as[DataFile]) { file =>
                         onSuccess(createFile(file)) { performed =>
-                          complete((StatusCodes.OK, performed))
+                          complete((StatusCodes.Accepted, performed))
                         }
                       }
 
@@ -126,7 +126,7 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
                     delete {
                       rejectEmptyResponse {
                         onSuccess(deleteFile(filename)) { response =>
-                          complete(StatusCodes.OK, response)
+                          complete(StatusCodes.Accepted, response)
                         }
                       }
                     }
