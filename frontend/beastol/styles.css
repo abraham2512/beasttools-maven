@@ -49,6 +49,8 @@ html, body {
     padding: 2px 16px;
   } */
 
+
+  /* OPENLAYERS POPUP  */
   .ol-popup {
     position: absolute;
     background-color: white;
@@ -90,3 +92,10 @@ html, body {
   .ol-popup-closer:after {
     content: "✖";
   }
+
+
+/* Bootstrap overrides */
+  .btn {
+    margin: 3%;
+  }
+

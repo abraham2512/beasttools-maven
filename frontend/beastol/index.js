@@ -134,7 +134,8 @@ function deleteDataset(dataset_name) {
   axios.delete(`http://127.0.0.1:8080/files/${dataset_name}`)
   .then((resp)=>{
     if (resp.status==202) {
-      document.getElementById("div_"+dataset_name).remove();
+      document.getElementById("div_"+dataset_name).innerHTML="";
+
     }
     else{
       console.log("Could not delete dataset");
@@ -175,21 +176,20 @@ function handleDataFileSubmit(event) {
 }
 
 function appendCardDiv(dataset_name){
-  console.log("Appending Div");
-  //
-  
+  console.log("Appending "+dataset_name);
+
   let newDiv = document.createElement("div");
   newDiv.className = "my_card"
   newDiv.id="div_"+dataset_name
-  let h5 = document.createElement("h5");
+  let h5 = document.createElement("h6");
   h5.className = "card-title";
   h5.innerHTML = dataset_name;
   newDiv.appendChild(h5);
 
-  let status = document.createElement("h6");
-  status.id="status_"+dataset_name;
-  status.innerHTML="";
-  newDiv.appendChild(status);
+  // let status = document.createElement("h6");
+  // status.id="status_"+dataset_name;
+  // status.innerHTML="In Queue";
+  // newDiv.appendChild(status);
 
     //CHECK STATUS BUTTON TODO -> AUTO REFRESH FOR STATUS
   // let inputElement = document.createElement('input');
@@ -220,6 +220,18 @@ function appendCardDiv(dataset_name){
   // });
     
   //newDiv.appendChild(inputElement);
+  
+  //PROGRESS BAR
+  let progress_div = document.createElement("div");
+  progress_div.style="margin-left:10%; margin-right:10%";
+  let progress_bar = document.createElement("div");
+  progress_bar.className="progress-bar progress-bar-striped progress-bar-animated";
+  progress_bar.style="width:10%; height:20px";
+  progress_bar.innerHTML="Enqueued";
+  progress_bar.id="progress_"+dataset_name;
+  progress_div.appendChild(progress_bar);
+
+  newDiv.appendChild(progress_div);
 
   //LAUNCH BUTTON
   let launch_button = document.createElement("input");
@@ -254,11 +266,24 @@ function appendCardDiv(dataset_name){
 }
 
 function updateStatus(dataset,status){
-  if(status=='indexed'){
+  if(status=='start'){
+    //document.getElementById('progress_'+dataset).style="width"
+  }
+  else if (status=='partitioned'){
+    document.getElementById('progress_'+dataset).style="width:50%"
+    document.getElementById('progress_'+dataset).innerHTML="partitioned"
+  }
+  else if(status=='indexed'){
+    document.getElementById('progress_'+dataset).style="width:100%"
+    document.getElementById('progress_'+dataset).innerHTML="indexed"
+    document.getElementById('progress_'+dataset).className ="progress-bar bg-success"
     document.getElementById(`launch_button_${dataset}`).disabled=false;
     document.getElementById(`delete_button_${dataset}`).disabled=false;
   }
-  if(status=="error"){
+  else if(status=="error"){
+    document.getElementById('progress_'+dataset).style="width:100%"
+    document.getElementById('progress_'+dataset).className ="progress-bar bg-error"
+    document.getElementById('progress_'+dataset).innerHTML="internal error!, delete and resubmit"
     document.getElementById(`launch_button_${dataset}`).disabled=true;
     document.getElementById(`delete_button_${dataset}`).disabled=true;
   }
@@ -266,28 +291,26 @@ function updateStatus(dataset,status){
 }
 
 document.addEventListener("DOMContentLoaded",function(){
+  //Create divs for exisiting datasets
   axios.get("http://127.0.0.1:8080/files").then(function(response){
     let data = response.data.files;
     console.log(data);
     for (const file of data){
       appendCardDiv(file.filename);
+      updateStatus(file.filename,file.filestatus);
     }
   });
 
   //Auto refresh for dataset status
   setInterval(function(){
     axios.get("http://127.0.0.1:8080/files").then(function(response){
-
     //console.log(response.data);
     let files = response.data['files'];
-    
     for (const file of Object.values(files)){
       console.log(file.filename,file.filestatus);
       updateStatus(file.filename,file.filestatus);
     }
-
     });
-
   },10000)
 });
 
