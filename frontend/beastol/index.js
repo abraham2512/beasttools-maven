@@ -134,8 +134,8 @@ function deleteDataset(dataset_name) {
   axios.delete(`http://127.0.0.1:8080/files/${dataset_name}`)
   .then((resp)=>{
     if (resp.status==202) {
-      document.getElementById("div_"+dataset_name).innerHTML="";
-
+      document.getElementById("div_"+dataset_name).remove();
+      document.getElementById('map').remove()
     }
     else{
       console.log("Could not delete dataset");
@@ -186,40 +186,6 @@ function appendCardDiv(dataset_name){
   h5.innerHTML = dataset_name;
   newDiv.appendChild(h5);
 
-  // let status = document.createElement("h6");
-  // status.id="status_"+dataset_name;
-  // status.innerHTML="In Queue";
-  // newDiv.appendChild(status);
-
-    //CHECK STATUS BUTTON TODO -> AUTO REFRESH FOR STATUS
-  // let inputElement = document.createElement('input');
-  // inputElement.type = "button";
-  // inputElement.value = "Check Status";
-  // inputElement.className = "btn btn-info"
-
-  // inputElement.addEventListener('click', function(){
-  //   console.log("CheckingStatus");
-  //   console.log(dataset_name);
-  //   axios.get(`http://127.0.0.1:8080/files/${dataset_name}`)
-  //   .then(
-  //     function(response){
-  //     let data = response.data;
-  //     let status = data['filestatus']
-  //     console.log(status);
-  //     document.getElementById(`status_${dataset_name}`).innerHTML=status;
-  //     if(status=='indexed'){
-  //       document.getElementById(`launch_button_${dataset_name}`).disabled=false;
-  //       document.getElementById(`delete_button_${dataset_name}`).disabled=false;
-  //     }  
-  //   })
-  //   .catch(
-  //     function(error){
-  //       console.log(error);
-  //     }
-  //   );
-  // });
-    
-  //newDiv.appendChild(inputElement);
   
   //PROGRESS BAR
   let progress_div = document.createElement("div");
