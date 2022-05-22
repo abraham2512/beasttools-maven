@@ -33,11 +33,11 @@ Welcome to the documentation of the BEAST API Project!
     pom.xml # Maven dependencies
 
 ### Building 
-Maven-shade-plugin is used to build into a Uber JAR using `mvn clean package` 
+Run `mvn clean package` to build a deployable fat-jar
+Download beast binaries from this link [beast-bitbucket](https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads)
 
 ### Deploying
-The Uber Jar with all dependencies can be deployed on Spark with `spark-submit`  
-*Build dependenices not clean/working at the time of writing*. 
+Deploy the jar with `beast beast-1.1-RC.jar` 
     
 ## Additional Documentation
 - [Beast Documentation](https://bitbucket.org/bdlabucr/beast/src/master/)
