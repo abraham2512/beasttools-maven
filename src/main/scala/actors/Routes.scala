@@ -19,6 +19,7 @@ case class DataFile(filename:String, filetype:String, filesource:String, filesta
 }
 final case class DataFiles(files: Seq[DataFile])
 
+//The Routing Logic class
 class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[TileActor.TileCommand])(implicit val system: ActorSystem[_]) {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -60,8 +61,8 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
     val rejectionHandler = corsRejectionHandler.withFallback(RejectionHandler.default)
 
     // Your exception handler
-    val exceptionHandler = ExceptionHandler { case e: NoSuchElementException =>
-      complete(StatusCodes.NotFound -> e.getMessage)
+    val exceptionHandler = ExceptionHandler {
+      case e: NoSuchElementException => complete(StatusCodes.NotFound -> e.getMessage)
     }
 
     // Combining the two handlers only for convenience

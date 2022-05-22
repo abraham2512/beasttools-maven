@@ -4,7 +4,9 @@ import akka.actor.typed.{ActorSystem, MailboxSelector}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
-import scala.reflect.io.File
+
+import java.io
+import scala.reflect.io.{Directory, File}
 import scala.util.{Failure, Success}
 
 //#main-class
@@ -32,6 +34,12 @@ object StartApp {
         //val props = MailboxSelector.defaultMailbox()
         //println("Pre Actors Routine")
         //if (File("application.conf").exists) println("FOUND APP CONF") else println("NOPE")
+        if(!Directory("data").exists){
+          new java.io.File("data/indexed").mkdirs
+          new java.io.File("data/viz").mkdirs
+          println("root: Creating rtree/tiles directories")
+        }
+        println("root: Starting actor system")
         val fileRegistryActor = context.spawn(FileRegistry(),name="FileRegistryActor",MailboxSelector.bounded(capacity = 100))
         context.watch(fileRegistryActor)
         val tileActor = context.spawn(TileActor(), name="TileActor",MailboxSelector.bounded(capacity = 100))

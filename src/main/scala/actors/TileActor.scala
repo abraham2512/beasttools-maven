@@ -36,16 +36,21 @@ object TileActor {
             //println("actors.TileActor: Spark session started!")
             println("actors.TileActor: Starting tile plot for tile-" + z + "-" + x + "-" + y)
             val tileID = TileIndex.encode(z.toInt, x.toInt, y.toInt)
-            val tileIndexPath = new Path("data/indexed", dataset)
-            val tileVizPath = new Path("data/viz", dataset)
-            val fileSystem = tileIndexPath.getFileSystem(sc.hadoopConfiguration)
-            val interimOutput = new ByteArrayOutputStream()
-
-            MultilevelPyramidPlotHelper
-              .plotTile(fileSystem, tileVizPath, tileID, interimOutput)
-            interimOutput.close()
-            println("actors.TileActor: Finished plot")
-            replyTo ! interimOutput.toByteArray
+            //val tileIndexPath = new Path("data/indexed", dataset)
+            val tileVizPath = new Path("data/viz")
+            val fileSystem = tileVizPath.getFileSystem(sc.hadoopConfiguration)
+            val datasetPath = new Path(tileVizPath,dataset)
+            if (fileSystem.exists(datasetPath)){
+              val interimOutput = new ByteArrayOutputStream()
+              MultilevelPyramidPlotHelper.plotTile(fileSystem, datasetPath, tileID, interimOutput)
+              interimOutput.close()
+              replyTo ! interimOutput.toByteArray
+              println("actors.TileActor: Finished plot")
+            }
+            else{
+              println("actors.TileActor: Tile request for deleted dataset " + dataset)
+              replyTo ! new ByteArrayOutputStream().toByteArray
+            }
 
           } catch {
             case e: Exception => println("actors.TileActor: ERROR : " + e.toString)
