@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Overview - BeastApi-Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Overview";
+        var mkdocs_page_input_path = "overview.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> BeastApi-Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Overview</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#akka-and-akkahttp">Akka and AkkaHTTP</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#actors-in-beastapi">Actors in BeastAPI</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#current-architecture-design">Current Architecture design</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#using-akka-actorcontext-and-behaviors">Using Akka ActorContext and Behaviors</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../backend/">Backend</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../frontend/">Frontend</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../api_example/">Example1 /meta/</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ol_example/">Example2 OL event</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../h2db_example/">Example3 Accessing H2DB</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">BeastApi-Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Overview</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="beast-microservice">Beast Microservice</h1>
+<p>The microservice backend is to enable upload and processing of Spatial-Temporal data files on the Hadoop using Spark and BEAST library. </p>
+<p>There were a few design considerations and AkkaHTTP was deemed a good fit for the API. It is a lightweight but feature-rich and highly scalable toolkit for building API endpoints based on the Actor Model and message passing. It uses the functional programming paradigm which is ideal for using with Spark and BEAST.</p>
+<h3 id="akka-and-akkahttp">Akka and AkkaHTTP</h3>
+<ul>
+<li>Concurrency through message passing (Actors)</li>
+<li>Non-blocking by default (Futures)</li>
+<li>Fault Tolerance (a.k.a. Resiliency, ‘let it crash’ model) </li>
+</ul>
+<p>By building the endpoints using actors and separating the indexing/partitioning jobs and tile generation jobs, we can achieve a degree of parallelism in our API. Our project has three Actors</p>
+<h3 id="actors-in-beastapi">Actors in BeastAPI</h3>
+<ul>
+<li><strong>Routes.scala</strong> : Entry point and handles routing logic. Passes messages to TileActor and HdfsActor </li>
+<li><strong>HdfsActor.scala</strong> : Partitioning and indexing job messages are received and performed by this Actor</li>
+<li><strong>TileActor.scala</strong> : Tiles are generated on the fly from indexes by this actor</li>
+</ul>
+<p>The actors can be deployed and scaled horizontally into the cluster using the Akka Cluster API. The following video is a good source of motivation to use <a href="https://akka.io/blog/news/2020/06/01/akka-cluster-motivation?_ga=2.208480850.1366963332.1650776591-1484330899.1642330423">Akka-Cluster</a></p>
+<h3 id="current-architecture-design">Current Architecture design</h3>
+<p><img alt="api-design" src="../images/api-design.png" /> </p>
+<h3 id="using-akka-actorcontext-and-behaviors">Using Akka ActorContext and Behaviors</h3>
+<p>A Scala object can be made into an Akka actor simply by importing <code>akka.actor.typed.scaladsl.ActorContext</code> and <code>akka.actor.typed.scaladsl.Behaviors</code> into your scala object. Use <code>Behaviours.setup</code> to create a match case for <code>ActorContext</code>. Any message passed to this actor will be processed depending on its match case.</p>
+<p>A simple example would be</p>
+<pre><code>object MyActor{
+
+    def apply(): Behavior[CommandTrait] = Behaviors.setup {
+    context: ActorContext[CommandTrait] =&gt;
+      println(&quot;actors.HdfsRegistry: Hdfs Actor awake&quot;)
+
+      Behaviors.receiveMessage {
+
+        case SpeakText(msg) =&gt;
+          println(s&quot;actors.HdfsActor: got a msg: $msg&quot;)
+          Behaviors.same
+        case _ =&gt;
+          println(&quot;Default Case&quot;)
+          Behaviors.same
+      }
+
+    }
+}
+
+</code></pre>
+<p>For the Actor to be visible to other actors in the server, we can register it to the <code>Receptionist</code>. Something like this would tell the receptionist to register the actor.</p>
+<pre><code>context.system.receptionist ! Receptionist.Register(&quot;KeyForNewActor&quot;, context.self)
+</code></pre>
+<p>More information on this can be found in this guide <a href="https://doc.akka.io/docs/akka/current/typed/actors.html">akka-docs</a></p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../backend/" class="btn btn-neutral float-right" title="Backend">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../backend/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

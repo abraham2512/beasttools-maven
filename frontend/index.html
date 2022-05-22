@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Frontend - BeastApi-Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Frontend";
+        var mkdocs_page_input_path = "frontend.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> BeastApi-Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../backend/">Backend</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Frontend</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#start-your-own-front-end">Start your own front-end</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#clone-beast-viz">Clone Beast Viz</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#setup-the-interface">Setup the interface</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#indexjs">index.js</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#function-launchmapfilename">function launchMap(filename)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#function-handledatafilesubmitevent">function handleDataFileSubmit(event)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#function-appendcarddivfilename">function appendCardDiv(filename)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#indexhtml">index.html</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../api_example/">Example1 /meta/</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ol_example/">Example2 OL event</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../h2db_example/">Example3 Accessing H2DB</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">BeastApi-Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Frontend</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="maps-interface">Maps Interface</h1>
+<p>The interface is built with <a href="https://openlayers.org">OpenLayers</a> and JavaScript.  </p>
+<h2 id="start-your-own-front-end">Start your own front-end</h2>
+<p>OpenLayers.js can be imported as a browser script but modern JavaScript works best when using and authoring modules. 
+The recommended way of using OpenLayers is installing the ol package. This can be done through node using the command <code>npx create-ol-app</code>. 
+For more information, see the guide <a href="https://openlayers.org/en/latest/doc/tutorials/bundle.html">here</a></p>
+<h2 id="clone-beast-viz">Clone Beast Viz</h2>
+<p>To clone the default front-end, run this command to clone the repository
+<code>git clone git@github.com:abraham2512/beasttools-maven.git</code> and open the frontend/beastol/ project folder.
+The project has <strong>index.js</strong>, <strong>index.html</strong>, <strong>styles.css</strong> and a <strong>package.json</strong> configuration file.</p>
+<h3 id="setup-the-interface">Setup the interface</h3>
+<ul>
+<li>First install node modules from package.json with <code>npm install</code>. </li>
+<li>For development run the server using <code>npm run start</code>.</li>
+<li>For deployment bundle the files using <code>npm run build</code> to create one <strong>index.html</strong> file that can be served.</li>
+</ul>
+<h3 id="indexjs">index.js</h3>
+<h6 id="function-launchmapfilename">function launchMap(filename)</h6>
+<pre><code>:Creates a map with the filename ID. 
+:Makes GET request to /tiles/ endpoint in backend with dataset = {filename} and {Z}, {X}, {Y} values.
+</code></pre>
+<h6 id="function-handledatafilesubmitevent">function handleDataFileSubmit(event)</h6>
+<pre><code>:Handles form submit with data json.
+:Makes POST request to /files/ endpoint with data payload. This triggers partitioning and indexing of data.
+</code></pre>
+<h6 id="function-appendcarddivfilename">function appendCardDiv(filename)</h6>
+<pre><code>:Appends a new Card for the dataset in the UI to track its progress and launch when ready.
+</code></pre>
+<h3 id="indexhtml">index.html</h3>
+<p>This file imports the index.js module and contains the main html.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../backend/" class="btn btn-neutral float-left" title="Backend"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../api_example/" class="btn btn-neutral float-right" title="Example1 /meta/">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../backend/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../api_example/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

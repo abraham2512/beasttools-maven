@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>BeastApi-Docs</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Home";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> BeastApi-Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#getting-started-to-develop">Getting Started to Develop!</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#project-layout">Project layout</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#building">Building</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#deploying">Deploying</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#additional-documentation">Additional Documentation</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="overview/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="backend/">Backend</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="frontend/">Frontend</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="api_example/">Example1 /meta/</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="ol_example/">Example2 OL event</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="h2db_example/">Example3 Accessing H2DB</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">BeastApi-Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="welcome-to-beast-api-documentation">Welcome to Beast API Documentation</h1>
+<p>Welcome to the documentation of the BEAST API Project! </p>
+<h2 id="getting-started-to-develop">Getting Started to Develop!</h2>
+<ul>
+<li>The project requires JDK v1.8 and Spark v3.0.1 for the <a href="https://bitbucket.org/bdlabucr/beast/src/master/">BEAST</a> library, ensure <code>SPARK_HOME</code> and <code>JAVA_HOME</code> are in path.</li>
+<li>Pull the repository using <code>git clone git@github.com:abraham2512/beasttools-maven.git</code></li>
+<li>Maven is used to compile dependencies and launch the project</li>
+<li>Compile the project using IntelliJ with compile-time dependencies and run with StartApp as main class</li>
+</ul>
+<h3 id="project-layout">Project layout</h3>
+<pre><code>src/
+    main/
+        scala/
+            StartApp.scala  # Main function and entry point to the server.
+            actors  # Contains all the actors
+                Routes.scala       # ScalaDSL routing logic.
+                FileRegistry.scala  # Helper object for the HTTP routing Actor
+                HdfsActor.scala     # Actor for indexing and partitioning of data using BEAST 
+                TileActor.scala     # Actor for rendering tiles on the fly using index 
+            models
+                DataFileDAL.scala   # Relational Mapping for H2 metadata database
+                DataFileDAO.scala
+            utils
+                JsonFormats.scala
+    resources/
+        application.conf #Configuration File for the server
+pom.xml # Maven dependencies
+</code></pre>
+<h3 id="building">Building</h3>
+<p>Run <code>mvn clean package</code> to build a deployable fat-jar
+Download beast binaries from this link <a href="https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads">beast-bitbucket</a></p>
+<h3 id="deploying">Deploying</h3>
+<p>Deploy the jar with <code>beast beast-1.1-RC.jar</code> </p>
+<h2 id="additional-documentation">Additional Documentation</h2>
+<ul>
+<li><a href="https://bitbucket.org/bdlabucr/beast/src/master/">Beast Documentation</a></li>
+<li><a href="https://doc.akka.io/docs/akka-http/current/index.html">AkkaHTTP Documentation</a></li>
+<li><a href="https://www.artima.com/shop/akka_concurrency">Akka Concurrency by Derek Wyatt</a> - A great book that runs through the basics of Akka!</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="overview/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+      <span><a href="overview/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme_extra.js" defer></script>
+    <script src="js/theme.js" defer></script>
+      <script src="search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.3.0
+Build Date UTC : 2022-05-22 01:04:54.026081+00:00
+-->
