@@ -28,12 +28,12 @@ object TileActor {
   def apply(): Behavior[TileCommand] = Behaviors.setup {
     context: ActorContext[TileCommand] =>
       context.system.receptionist ! Receptionist.Register(TileKey, context.self)
-      println("actors.TileActor: Listening for tiles to generate")
+      println("actors.TileActor: Listening for tiles")
 
       Behaviors.receiveMessage {
         case GetTile(dataset, (z, x, y), replyTo) =>
           try {
-            println("actors.TileActor: Spark session started!")
+            //println("actors.TileActor: Spark session started!")
             println("actors.TileActor: Starting tile plot for tile-" + z + "-" + x + "-" + y)
             val tileID = TileIndex.encode(z.toInt, x.toInt, y.toInt)
             val tileIndexPath = new Path("data/indexed", dataset)
@@ -104,7 +104,7 @@ object TileActor {
                   dataType match {
                     case StringType => return_map += (attName->value)
                     case IntegerType => return_map += (attName->value.toString)
-                    case default => println("default case for "+dataType)
+                    case default => println("actors.TileActor: default case for "+dataType)
                   }
                 }
               }
@@ -114,7 +114,7 @@ object TileActor {
           //GET METADATA
           replyTo ! Json(DefaultFormats).write(return_map)
           Behaviors.same
-        case _ => println("default case")
+        case _ => println("actors.TileActor: default case")
           Behaviors.same
       }
   }

@@ -34,7 +34,7 @@ object HdfsActor {
         case PartitionToHDFS(file) =>
 
           try {
-            println("actors.HdfsActor: Started partition job for file " + file.filename)
+            println("actors.HdfsActor: Started file " + file.filename)
             DataFileDAL.update_status(file.filename, filestatus = "downloading")
 
             //Partitioning the data and storing as r-tree
@@ -67,7 +67,7 @@ object HdfsActor {
               HDFSActionPerformed("Failure")
               Behaviors.same
             case e: Exception =>
-              println("Error" + e.toString)
+              println("actors.HdfsActor: Error :" + e.toString)
               DataFileDAL.update_status(file.filename, filestatus = "Partitioning error, check log")
               HDFSActionPerformed("Failure")
               Behaviors.same
@@ -77,7 +77,7 @@ object HdfsActor {
             HDFSActionPerformed("Exit")
             Behaviors.same
           }
-        case _ => println("default case")
+        case _ => println("actors.HdfsActor: default case")
           Behaviors.same
       }
   }

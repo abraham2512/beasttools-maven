@@ -82,7 +82,7 @@ object FileRegistry {
             val f: Seq[(String, String, String, String)] = DataFileDAL.get_all()
             val files_data = f.map(f => DataFile(f._1, f._2, f._3, f._4))
             replyTo ! DataFiles(files_data)
-            println("actors.FileRegistry: Database get all complete!")
+            //println("actors.FileRegistry: Database get all complete!")
           Behaviors.same
 
         case DeleteFile(filename,replyTo) =>
@@ -96,7 +96,7 @@ object FileRegistry {
             FileUtils.deleteDirectory(new File(vizpath))
           } catch {
             case e: FileNotFoundException =>
-              println("actors.FileRegistry: File doesnt exist" + e.toString)
+              println("actors.FileRegistry: File does not exist" + e.toString)
           } finally {
             println(s"actors.FileRegistry: $filename deleted")
           }
@@ -116,7 +116,7 @@ object FileRegistry {
 
         //DEFAULT
         case _ =>
-          print("actors.FileRegistry: DEFAULT CASE")
+          print("actors.FileRegistry: default case")
           Behaviors.same
 
       }
