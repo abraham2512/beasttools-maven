@@ -6,7 +6,7 @@
 
     <groupId>edu.ucr.cs.bdlab</groupId>
     <artifactId>beasttools</artifactId>
-    <version>1.0</version>
+    <version>1.1-RC</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -87,11 +87,6 @@
             <type>pom</type>
             <scope>import</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.typesafe.akka</groupId>-->
-<!--            <artifactId>akka-stream-testkit_2.12</artifactId>-->
-<!--            <version>${akka.version}</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_2.12</artifactId>
@@ -114,12 +109,6 @@
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.typesafe.akka</groupId>-->
-<!--            <artifactId>akka-testkit-typed_2.12</artifactId>-->
-<!--            <version>2.5.12</version>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.typesafe.akka</groupId>-->
 <!--            <artifactId>akka-actor-testkit-typed_2.12</artifactId>-->
 <!--            <version>2.6.18</version>-->
 <!--            <scope>test</scope>-->
@@ -139,11 +128,6 @@
             <artifactId>akka-http-spray-json_2.12</artifactId>
             <version>10.2.7</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.typesafe.akka</groupId>-->
-<!--            <artifactId>akka-http-testkit_2.12</artifactId>-->
-<!--            <version>10.2.7</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-parsing_2.12</artifactId>
@@ -257,16 +241,6 @@
                 <configuration>
                     <artifactSet>
                         <includes>
-                            <include>edu.ucr.cs.bdlab:beast</include>
-                            <include>edu.ucr.cs.bdlab:beast-spark</include>
-                            <include>edu.ucr.cs.bdlab:cg</include>
-                            <include>edu.ucr.cs.bdlab:common</include>
-                            <include>edu.ucr.cs.bdlab:io</include>
-                            <include>edu.ucr.cs.bdlab:raptor</include>
-                            <include>edu.ucr.cs.bdlab:visualization</include>
-                            <include>edu.ucr.cs.bdlab:jhdf</include>
-                            <include>org.locationtech.jts:jts-core</include>
-                            <!-- /org.typesafe.akka:akka-core + dependencies -->
 
                             <include>com.typesafe.akka:akka-actor-typed_2.12</include>
                             <include>com.typesafe.akka:akka-actor_2.12</include>
@@ -284,31 +258,8 @@
                             <include>io.spray:spray-json_2.12</include>
                             <include>ch.megard:akka-http-cors_2.12</include>
                             <include>com.typesafe:ssl-config-core_2.12</include>
+                            <include>org.json4s:json4s-native_2.12</include>
 
-
-                            <!-- org.geotools:gt-epsg-hsql + dependencies -->
-                            <include>org.geotools:gt-epsg-hsql</include>
-                            <include>org.geotools:gt-referencing</include>
-                            <include>org.geotools:gt-metadata</include>
-                            <include>org.geotools:gt-opengis</include>
-                            <include>org.geotools.ogc:net.opengis.ows</include>
-                            <include>org.geotools.ogc:org.w3.xlink</include>
-                            <include>org.hsqldb:hsqldb</include>
-                            <include>systems.uom:systems-common-java8</include>
-                            <include>tec.uom:uom-se</include>
-                            <include>tec.uom.lib:uom-lib-common</include>
-                            <include>si.uom:si-quantity</include>
-                            <include>si.uom:si-units-java8</include>
-                            <include>javax.measure:unit-api</include>
-                            <include>javax:javaee-api</include>
-                            <include>javax.media:jai_core</include>
-                            <include>com.sun.mail:javax.mail</include>
-                            <include>org.ejml:ejml-ddense</include>
-                            <include>org.ejml:ejml-core</include>
-                            <include>commons-pool:commons-pool</include>
-                            <include>jgridshift:jgridshift-core</include>
-                            <include>net.sf.geographiclib:GeographicLib-Java</include>
-                            <!-- /org.geotools:gt-epsg-hsql + dependencies -->
 
                         </includes>
                     </artifactSet>
@@ -347,7 +298,6 @@
                         <transformer
                                 implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                     </transformers>
-
                 </configuration>
                 <executions>
                     <execution>
@@ -355,80 +305,9 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
-<!--                        <configuration>-->
-<!--                        <relocations>-->
-<!--                            <relocation>-->
-<!--                                <pattern>edu.ucr.cs.bdlab:visualization</pattern>-->
-<!--                                <shadedPattern>edu.ucr.cs.bdlab.davinci</shadedPattern>-->
-<!--&lt;!&ndash;                                <includes>&ndash;&gt;-->
-<!--&lt;!&ndash;                                    <include>edu.ucr.cs.bdlab.davinci.MultilevelPlot</include>&ndash;&gt;-->
-<!--&lt;!&ndash;                                </includes>&ndash;&gt;-->
-<!--                            </relocation>-->
-<!--                        </relocations>-->
-<!--                    </configuration>-->
                     </execution>
                 </executions>
             </plugin>
-
-
-<!--            //MY NEW CONF-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-shade-plugin</artifactId>-->
-<!--                <version>3.2.4</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>shade</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <shadedArtifactAttached>true</shadedArtifactAttached>-->
-<!--                            <shadedClassifierName>fat-shaded</shadedClassifierName>-->
-<!--                            <artifactSet>-->
-<!--                                <includes>-->
-<!--                                    <include>*:*</include>-->
-<!--                                </includes>-->
-<!--                            </artifactSet>-->
-<!--                            <filters>-->
-<!--                                <filter>-->
-<!--                                    <artifact>*:*</artifact>-->
-<!--                                    <excludes>-->
-<!--                                        <exclude>META-INF/*.SF</exclude>-->
-<!--                                        <exclude>META-INF/*.DSA</exclude>-->
-<!--                                        <exclude>META-INF/*.RSA</exclude>-->
-<!--                                    </excludes>-->
-<!--                                </filter>-->
-<!--                            </filters>-->
-<!--                            <transformers>-->
-<!--                                <transformer-->
-<!--                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">-->
-<!--                                    <resource>reference.conf</resource>-->
-<!--                                </transformer>-->
-<!--                                <transformer-->
-<!--                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">-->
-<!--                                    <resource>version.conf</resource>-->
-<!--                                </transformer>-->
-<!--                                <transformer-->
-<!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
-<!--                                    <mainClass>StartApp</mainClass>-->
-<!--                                    <manifestEntries>-->
-<!--                                        &lt;!&ndash; These entries are required for some ImageIO features to work &ndash;&gt;-->
-<!--                                        <Specification-Vendor>BDLab</Specification-Vendor>-->
-<!--                                        <Implementation-Vendor>BDLab</Implementation-Vendor>-->
-<!--                                        <Implementation-Version>${project.version}</Implementation-Version>-->
-<!--                                    </manifestEntries>-->
-<!--                                </transformer>-->
-<!--                            </transformers>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
-
-
-
-
         </plugins>
     </build>
 
