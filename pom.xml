@@ -191,6 +191,28 @@
             <version>0.6.1</version>
         </dependency>
 
+<!--dependencies not in beast-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
@@ -259,7 +281,10 @@
                             <include>ch.megard:akka-http-cors_2.12</include>
                             <include>com.typesafe:ssl-config-core_2.12</include>
                             <include>org.json4s:json4s-native_2.12</include>
-
+                            <include>org.apache.commons:commons-lang3</include>
+                            <include>javax.activation:activation</include>
+                            <include>com.google.code.findbugs:jsr305</include>
+                            <include>com.fasterxml.jackson.core:jackson-core</include>
 
                         </includes>
                     </artifactSet>
