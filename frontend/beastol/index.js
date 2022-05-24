@@ -152,11 +152,11 @@ function handleDataFileSubmit(event) {
   let filesource = document.getElementById("filepath").value
    //appendCardDiv(filename);
   axios.post('http://127.0.0.1:8080/files',{
-                                             filename : filename,
-                                               filesource : filesource,
-                                               filestatus : "start",
-                                               filetype : "default"
-                                            })
+    filename : filename,
+    filesource : filesource,
+    filestatus : "start",
+    filetype : "default"
+  })
   .then(function(response){
     console.log(response);
     if(response.status==202){
