@@ -4,7 +4,7 @@ Welcome to the documentation of the BEAST API Project.
 
 ## Getting Started to Develop!
 
-* The project requires JDK v1.8, Scala 2.12 and Spark v3.0.3 for the [BEAST](https://bitbucket.org/bdlabucr/beast/src/master/) library, ensure `SPARK_HOME` and `JAVA_HOME` are in path.
+* The project requires JDK v1.8, Scala 2.12, npm 8.8.0 and Spark v3.0.3 for the [BEAST](https://bitbucket.org/bdlabucr/beast/src/master/) library, ensure `SPARK_HOME` and `JAVA_HOME` are in path.
 * Pull the repository using `git clone git@github.com:abraham2512/beasttools-maven.git`
 * Compile the project using IntelliJ/Maven and run with StartApp as main class
  
@@ -28,12 +28,12 @@ Welcome to the documentation of the BEAST API Project.
             application.conf #Configuration File for the server
     pom.xml # Maven dependencies
 
-### Building 
-Run `mvn clean package` to build a deployable fat-jar
+### Building and running JAR
 Download beast binaries from this link [beast-bitbucket](https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads)
-
-### Deploying
-Deploy the jar with `beast beast-1.1-RC.jar` 
+Build the frontend static files first with `cd frontend/beastol && npm install && npm run build`
+Move the static files to resources folder `mv dist/* ../../src/main/resources/`
+Run `cd ../../ && mvn clean package` to build a deployable fat-jar
+Deploy the jar with `beast beast-1.1-RC.jar`
     
 ## Additional Documentation
 - [Beast Documentation](https://bitbucket.org/bdlabucr/beast/src/master/)
