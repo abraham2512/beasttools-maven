@@ -149,20 +149,14 @@ function handleDataFileSubmit(event) {
   event.preventDefault();
   console.log("Function called");
   let filename = document.getElementById("filename").value;
-  let my_data = {
-    filename : document.getElementById("filename").value,
-    filesource : document.getElementById("filepath").value,
-    filestatus : "start",
-    filetype : "default"
-  }
-  let my_headers = {
-    "Access-Control-Allow-Origin": "*", //Do not enable in production
-    "Access-Control-Allow-Credentials": "true",
-    "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Requested-With",
-    "Content-Type": "application/json"
-  }
+  let filesource = document.getElementById("filepath").value
    //appendCardDiv(filename);
-  axios.post('http://127.0.0.1:8080/files',data=my_data,headers=my_headers)
+  axios.post('http://127.0.0.1:8080/files',{
+                                             filename : filename,
+                                               filesource : filesource,
+                                               filestatus : "start",
+                                               filetype : "default"
+                                            })
   .then(function(response){
     console.log(response);
     if(response.status==202){

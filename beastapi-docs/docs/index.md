@@ -29,11 +29,13 @@ Welcome to the documentation of the BEAST API Project.
     pom.xml # Maven dependencies
 
 ### Building and running JAR
-Download beast binaries from this link [beast-bitbucket](https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads)
-Build the frontend static files first with `cd frontend/beastol && npm install && npm run build`
-Move the static files to resources folder `mv dist/* ../../src/main/resources/`
-Run `cd ../../ && mvn clean package` to build a deployable fat-jar
-Deploy the jar with `beast beast-1.1-RC.jar`
+* Download beast binaries from this link [beast-bitbucket](https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads)
+* Build the frontend static files first with `cd frontend/beastol && npm install && export NODE_OPTIONS=--no-experimental-fetch && npm run build`
+* Move the static files to resources folder `mv dist/* ../../src/main/resources/`
+* Run `cd ../../ && mvn clean package` to build a deployable fat-jar
+* Deploy the jar with `beast beast-1.1-RC.jar`
+
+ 
     
 ## Additional Documentation
 - [Beast Documentation](https://bitbucket.org/bdlabucr/beast/src/master/)
