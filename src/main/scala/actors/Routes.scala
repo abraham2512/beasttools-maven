@@ -71,6 +71,13 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
     handleErrors{
       cors(){
         handleErrors {
+          pathPrefix("ui"){
+            path(Segment) { filename =>
+              get{
+              getFromResource("static/"+filename)
+              }
+            }
+          } ~
           pathPrefix("meta"){
             pathEnd {
               get{
