@@ -47,9 +47,7 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#project-layout">Project layout</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#building">Building</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#deploying">Deploying</a>
+    <li class="toctree-l3"><a class="reference internal" href="#building-and-running-jar">Building and running JAR</a>
     </li>
         </ul>
     </li>
@@ -106,13 +104,12 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="welcome-to-beast-api-documentation">Welcome to Beast API Documentation</h1>
-<p>Welcome to the documentation of the BEAST API Project! </p>
+<p>Welcome to the documentation of the BEAST API Project.</p>
 <h2 id="getting-started-to-develop">Getting Started to Develop!</h2>
 <ul>
-<li>The project requires JDK v1.8 and Spark v3.0.1 for the <a href="https://bitbucket.org/bdlabucr/beast/src/master/">BEAST</a> library, ensure <code>SPARK_HOME</code> and <code>JAVA_HOME</code> are in path.</li>
+<li>The project requires JDK v1.8, Scala 2.12, npm 8.8.0 and Spark v3.0.3 for the <a href="https://bitbucket.org/bdlabucr/beast/src/master/">BEAST</a> library, ensure <code>SPARK_HOME</code> and <code>JAVA_HOME</code> are in path.</li>
 <li>Pull the repository using <code>git clone git@github.com:abraham2512/beasttools-maven.git</code></li>
-<li>Maven is used to compile dependencies and launch the project</li>
-<li>Compile the project using IntelliJ with compile-time dependencies and run with StartApp as main class</li>
+<li>Compile the project using IntelliJ/Maven and run with StartApp as main class</li>
 </ul>
 <h3 id="project-layout">Project layout</h3>
 <pre><code>src/
@@ -133,11 +130,12 @@
         application.conf #Configuration File for the server
 pom.xml # Maven dependencies
 </code></pre>
-<h3 id="building">Building</h3>
-<p>Run <code>mvn clean package</code> to build a deployable fat-jar
-Download beast binaries from this link <a href="https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads">beast-bitbucket</a></p>
-<h3 id="deploying">Deploying</h3>
-<p>Deploy the jar with <code>beast beast-1.1-RC.jar</code> </p>
+<h3 id="building-and-running-jar">Building and running JAR</h3>
+<p>Download beast binaries from this link <a href="https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads">beast-bitbucket</a>
+Build the frontend static files first with <code>cd frontend/beastol &amp;&amp; npm install &amp;&amp; npm run build</code>
+Move the static files to resources folder <code>mv dist/* ../../src/main/resources/</code>
+Run <code>cd ../../ &amp;&amp; mvn clean package</code> to build a deployable fat-jar
+Deploy the jar with <code>beast beast-1.1-RC.jar</code></p>
 <h2 id="additional-documentation">Additional Documentation</h2>
 <ul>
 <li><a href="https://bitbucket.org/bdlabucr/beast/src/master/">Beast Documentation</a></li>
@@ -191,5 +189,5 @@ Download beast binaries from this link <a href="https://bitbucket.org/bdlabucr/b
 
 <!--
 MkDocs version : 1.3.0
-Build Date UTC : 2022-05-22 01:04:54.026081+00:00
+Build Date UTC : 2022-05-24 08:04:32.663489+00:00
 -->
