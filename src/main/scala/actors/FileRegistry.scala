@@ -32,6 +32,7 @@ object FileRegistry {
   def apply(): Behavior[Command]  = Behaviors.setup {
     println("actors.FileRegistry: actors.Routes awake")
     DataFileDAL()
+    startup_clean() //removes corrupt datasets on bootup
     var hdfsActor:Option[ActorRef[HdfsActor.HdfsCommand]] = None
 
     context: ActorContext[Command] =>
@@ -86,20 +87,7 @@ object FileRegistry {
           Behaviors.same
 
         case DeleteFile(filename,replyTo) =>
-          DataFileDAL.delete_file(filename)
-          //println("File Deleted")
-          val indexpath = "data/indexed/"+filename
-          val vizpath = "data/viz/"+filename
-
-          try {
-            FileUtils.deleteDirectory(new File(indexpath))
-            FileUtils.deleteDirectory(new File(vizpath))
-          } catch {
-            case e: FileNotFoundException =>
-              println("actors.FileRegistry: File does not exist" + e.toString)
-          } finally {
-            println(s"actors.FileRegistry: $filename deleted")
-          }
+          delete_dataset(filename)
           replyTo ! FileActionPerformed("deleted")
           Behaviors.same
         //MESSAGE TO HDFS ACTOR
@@ -121,7 +109,31 @@ object FileRegistry {
 
       }
   }
+  def startup_clean(): Unit = {
+    val files = DataFileDAL.get_all()
+    for ( file <- files){
+      if(file._4 != "indexed"){
+        delete_dataset(file._1)
+      }
+    }
+  }
 
+  def delete_dataset(filename: String): Unit = {
+    DataFileDAL.delete_file(filename)
+    //println("File Deleted")
+    val indexpath = "data/indexed/"+filename
+    val vizpath = "data/viz/"+filename
+
+    try {
+      FileUtils.deleteDirectory(new File(indexpath))
+      FileUtils.deleteDirectory(new File(vizpath))
+    } catch {
+      case e: FileNotFoundException =>
+        println("actors.FileRegistry: File does not exist" + e.toString)
+    } finally {
+      println(s"actors.FileRegistry: $filename deleted")
+    }
+  }
 }
 
 
