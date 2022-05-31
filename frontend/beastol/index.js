@@ -147,18 +147,21 @@ function launchDataset(filename){
 //UI HANDLER FUNCTIONS BELOW
 
 function deleteDataset(dataset_name) {
-  axios.delete(`http://127.0.0.1:8080/files/${dataset_name}`)
-  .then((resp)=>{
-    if (resp.status==202) {
-      document.getElementById("div_"+dataset_name).remove();
-      document.getElementById('map').remove()
+  if (confirm("Do you want to delete this dataset?")==true){
+    axios.delete(`http://127.0.0.1:8080/files/${dataset_name}`)
+    .then((resp)=>{
+      if (resp.status==202) {
+        document.getElementById("div_"+dataset_name).remove();
+        document.getElementById('map').remove()
+      }
+      else{
+        console.log("Could not delete dataset");
+        console.log(resp.data);
+      }
     }
-    else{
-      console.log("Could not delete dataset");
-      console.log(resp.data);
-    }
+    );
   }
-  );
+ 
 }  
 
 function handleDataFileSubmit(event) {
