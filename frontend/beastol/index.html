@@ -20,70 +20,76 @@
     
     <div class="parent">
       <div class="child1">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-          <a class="navbar-brand" href="#">BeastViz</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">New Dataset</button>
 
-          <div class="collapse navbar-collapse" id="navbarText">
-            <!-- <ul class="navbar-nav mr-auto">
-              <li class="nav-item active">
-                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Features</a>
-              </li>
-            </ul> -->
-          </div>
-        </nav>
-        
         <div class="dataset_div">
-          <div id="datasets" style="overflow-y:auto">
+          <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">BeastUI</a>
+  <!--          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">-->
+  <!--            <span class="navbar-toggler-icon"></span>-->
+  <!--          </button>-->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">New Data</button>
+  
+            <div class="collapse navbar-collapse" id="navbarText">
+              <!-- <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">Features</a>
+                </li>
+              </ul> -->
+            </div>
+          </nav>
+          
+          <div id="datasets" style="height: 80vh; overflow-y:auto">
               <!-- <h2>Datasets</h2> -->
           </div>
+        </div>
+        <div class="footer_div">
+          <a href="https://abraham2512.github.io/beastapi-docs/">Documentation</a>
+          <p>BDLAB @ UCR</p>
         </div>
       </div>
 
       <div id="map_div" class="child2">
-        <div id="popup" class="ol-popup">
-          <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-          <div id="popup-content"></div>
-        </div>
+
       <div id="map"></div>  
+      <div id="popup" class="ol-popup" style="display: none;" >
+        <!-- <a href="" id="popup-closer" class="ol-popup-closer"></a> -->
+        <div id="popup-content"></div>
       </div>
-    </div>
-    
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Add New Dataset</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="form_div">
-              <form id="fileinputform">
-              <div class="form-group">  
-                <label for="message-text" class="col-form-label">Dataset Name:</label>
-                <input class="form-control" id="filename" type="text" required>
+      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add New Dataset</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form_div">
+                <form id="fileinputform">
+                <div class="form-group">  
+                  <label for="filename" class="col-form-label">Dataset Name:</label>
+                  <input class="form-control" id="filename" type="text" required>
+                </div>
+                <div class="form-group">
+                  <label for="filepath" class="col-form-label">Dataset Path:</label>
+                  <input class="form-control" id="filepath" type="text" required>
+              </div>  
+                </form>
               </div>
-              <div class="form-group">
-                <label for="message-text" class="col-form-label">Dataset Path:</label>
-                <input class="form-control" id="filepath" type="text" required>
-            </div>  
-              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button id="dataset_submit" type="button" data-dismiss="modal" class="btn btn-primary">Submit Dataset</button>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button id="dataset_submit" type="button" data-dismiss="modal" class="btn btn-primary">Submit Dataset</button>
-          </div>
         </div>
       </div>
+      </div>
     </div>
+
   </body>
 </html>

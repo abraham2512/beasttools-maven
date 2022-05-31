@@ -26,10 +26,10 @@ html, body {
 
 .child2 {
     width: 80%;
-    /* padding: 30px; */
-    /* height: 100vh;
-    border: green solid 5px;
-    margin: 50px; */
+    /* padding: 30px;  */
+    height: 100vh;
+    background-color: #d8c8ba;
+    /* margin: 50px;  */
 }
 .my_card {
 /* Add shadows to create the "card" effect */

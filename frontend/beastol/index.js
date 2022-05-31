@@ -21,7 +21,7 @@ import {toLonLat, transform} from 'ol/proj';
 import {toStringHDMS} from 'ol/coordinate';
 
 
-
+let map;
 //Launches OL MAP on launch_button click
 function launchMap(filename){
   //Creating Popup overlay before map
@@ -44,10 +44,10 @@ function launchMap(filename){
      },
    });
    
-   /**
-     * Add a click handler to hide the popup.
-     * @return {boolean} Don't follow the href.
-     */
+  //  /**
+  //    * Add a click handler to hide the popup.
+  //    * @return {boolean} Don't follow the href.
+  //    */
    closer.onclick = function () {
      overlay.setPosition(undefined);
      closer.blur();
@@ -61,32 +61,28 @@ function launchMap(filename){
   new_map.id="map";
   map_div.appendChild(new_map);
 
-  const my_layer = new TileLayer({
-    source: new XYZ({
-      url:
-        "http://127.0.0.1:8080/tiles/?dataset="+ filename +"&z={z}&x={x}&y={y}"
-    }),
+  // const my_layer = new TileLayer({
+  //   source: new XYZ({
+  //     url:
+  //       "http://127.0.0.1:8080/tiles/?dataset="+ filename +"&z={z}&x={x}&y={y}"
+  //   }),
     
-  });
+  // });
   
-  const map = new Map({
+  map = new Map({
     overlays:[overlay],
     target: 'map',
     layers: [
       new TileLayer({
         source: new OSM()
       }),
-      my_layer
+      // my_layer
     ],
     view: new View({
       center: [0, 0],
       zoom: 2 
     })
   });
-
-  // Setting Meta Value for current dataset
-
-  document.getElementById("dataset_current").content=filename;
   
   // CLICK EVENT
 
@@ -116,7 +112,7 @@ function launchMap(filename){
         object_string+=`${key}: ${value} <br>`
         }
         content.innerHTML = '<code>' + object_string + '</code>';
-        
+        document.getElementById('popup').style.display="block";
         console.log(response.data);
     }).catch((error)=>{
         console.log("ERROR:"+error);
@@ -125,7 +121,27 @@ function launchMap(filename){
   });
 }
 
+function launchDataset(filename){
+  
+  // Setting Meta Value for current dataset
 
+  document.getElementById("dataset_current").content=filename;
+
+  const my_layer = new TileLayer({
+    source: new XYZ({
+      url:
+        "http://127.0.0.1:8080/tiles/?dataset="+ filename +"&z={z}&x={x}&y={y}"
+    }),
+    
+  });
+  
+  let layers = map.getLayers();
+  if(layers.array_.length == 2){
+    map.removeLayer(map.getLayers().array_[1])
+  }
+  map.addLayer(my_layer);
+  
+}  
 
 
 //UI HANDLER FUNCTIONS BELOW
@@ -201,7 +217,7 @@ function appendCardDiv(dataset_name){
   launch_button.className="btn btn-success"
   launch_button.disabled=true;
   launch_button.addEventListener('click', function(){
-    launchMap(dataset_name);
+    launchDataset(dataset_name);
   });
   
   newDiv.appendChild(launch_button);    
@@ -275,3 +291,4 @@ document.addEventListener("DOMContentLoaded",function(){
 });
 
 document.getElementById('dataset_submit').addEventListener('click',handleDataFileSubmit)
+window.onload=launchMap();

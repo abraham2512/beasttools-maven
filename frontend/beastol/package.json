@@ -4,7 +4,8 @@
   "description": "Beast OpenLayers with Parcel",
   "scripts": {
     "start": "parcel serve index.html",
-    "build": "parcel build --public-url . index.html"
+    "clean": "rm ../../src/main/resources/static/*",
+    "build": "export NODE_OPTIONS=--no-experimental-fetch && parcel build --public-url . index.html --dist-dir ../../src/main/resources/static/"
   },
   "dependencies": {
     "axios": "^0.26.1",
