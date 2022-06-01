@@ -5,46 +5,22 @@ Akka Actors and Akka HTTP based microservice built for distributed processing an
 For more documentation, please check this link https://abraham2512.github.io/beastapi-docs/
 
 ### Dependencies
-* JDK 8 
-* Maven 
-* Scala 2.12
-* Spark 3.0
-* NodeJS
+JDK8 Maven Scala2.12 Spark3.0 NodeJS 
 
-### Instructions to setup development environment
-#### Step 1 : Start Backend
+### Instructions for development environment
+#### Frontend
+* cd into frontend/beastol/ and install dependencies with `npm install`
+* Start Frontend -> run `npm run start`
+* Build -> `npm run build` (outputs to maven resources folder)
+
+#### Backend
 * Open with IntelliJ and use Maven to compile 
 * Create an empty folder "data" with sub-folders "indexed" and "viz"
 * Start Backend -> Edit configurations to use StartApp as main class to run as java 8 Application. 
+* Build -> `mvn clean package` (build fat jar)
 
-#### Step 2 : Start Frontend
-* cd into frontend/beastol/ and install dependencies with `npm install`
-
-* 
-* Start Frontend -> run `npm run start`
-* 
-
-### API Endpoints
-* Get all files GET-> http://127.0.0.1:8080/files
-* Get details of file GET->  http://127.0.0.1:8080/files/filename
-* Delete a file DELETE-> http://127.0.0.1:8080/files/filename
-
-* Load a file into beast POST -> http://127.0.0.1:8080/files
-    with body containing a json like
- {
-  "filename": "SafetyDept",
-  "filetype": "shapefile",
-  "filesource": "/Users/abraham/Downloads/PLUS_Survey_Modified/",
-  "filestatus": "start"
-  }
-* Fetch a pre-generated tile or generate one on the fly 
-    GET-> http://127.0.0.1:8080/tiles/?dataset=dataset-name&z=Z-value&x=X-value&y=Y-value
-
-
-### Pending work
-
-* Integration tests with all actors and test them together
-* Fix maven build issue when building uber-jar
+Deploy with `beast beasttools-1.1-RC.jar` 
+Download the latest beast binary [here.](https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads)
 
 ## Authors
 
@@ -53,8 +29,8 @@ email: apala049@ucr.edu
 
 ## Version History
 
-* 0.1
-* Initial Release
+* 1.1 RC
+* Stable_RC
 
 ## License
 
