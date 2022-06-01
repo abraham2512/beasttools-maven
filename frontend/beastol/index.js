@@ -152,7 +152,9 @@ function deleteDataset(dataset_name) {
     .then((resp)=>{
       if (resp.status==202) {
         document.getElementById("div_"+dataset_name).remove();
-        document.getElementById('map').remove()
+        if (document.getElementById('map')!=undefined){
+          document.getElementById('map').remove()
+        }
       }
       else{
         console.log("Could not delete dataset");
@@ -259,12 +261,12 @@ function updateStatus(dataset,status){
     document.getElementById(`launch_button_${dataset}`).disabled=false;
     document.getElementById(`delete_button_${dataset}`).disabled=false;
   }
-  else if(status=="error"){
+  else{
     document.getElementById('progress_'+dataset).style="width:100%"
     document.getElementById('progress_'+dataset).className ="progress-bar bg-error"
     document.getElementById('progress_'+dataset).innerHTML="internal error!, delete and resubmit"
-    document.getElementById(`launch_button_${dataset}`).disabled=true;
-    document.getElementById(`delete_button_${dataset}`).disabled=true;
+    //document.getElementById(`launch_button_${dataset}`).disabled=true;
+    document.getElementById(`delete_button_${dataset}`).disabled=false;
   }
 
 }
