@@ -164,7 +164,23 @@ function deleteDataset(dataset_name) {
     );
   }
  
-}  
+}
+function indexDataset(dataset_name) {
+
+    axios.put('http://127.0.0.1:8080/files',{
+        filename : dataset_name,
+        filesource : "test",
+        filestatus : "start",
+        filetype : "geojson"
+    })
+    .then((resp)=>{
+        console.log(resp.status)
+        console.log('r-tree partitioning and index creation started')
+
+    })
+
+
+}
 
 function handleDataFileSubmit(event) {
   event.preventDefault();
@@ -214,6 +230,45 @@ function appendCardDiv(dataset_name){
 
   newDiv.appendChild(progress_div);
 
+    //QUERY BUTTON
+    let query_button = document.createElement("input");
+    query_button.type="button"
+    query_button.id=`delete_button_${dataset_name}`
+    query_button.value="query"
+    query_button.className="btn btn-info"
+    query_button.disabled=false;
+    query_button.addEventListener('click', function(){
+      console.log("Running query");
+    });
+
+  newDiv.appendChild(query_button);
+
+    //DELETE BUTTON
+    let delete_button = document.createElement("input");
+    delete_button.type="button"
+    delete_button.id=`delete_button_${dataset_name}`
+    delete_button.value="delete"
+    delete_button.className="btn btn-danger"
+    delete_button.disabled=false;
+    delete_button.addEventListener('click', function(){
+    deleteDataset(dataset_name);
+    });
+
+  newDiv.appendChild(delete_button);
+
+  //INDEX BUTTON
+  let index_button = document.createElement("input");
+  index_button.type="button"
+  index_button.id=`index_button_${dataset_name}`
+  index_button.value="index"
+  index_button.className="btn btn-primary"
+  index_button.disabled=false;
+  index_button.addEventListener('click', function(){
+    indexDataset(dataset_name);
+  });
+
+  newDiv.appendChild(index_button);
+
   //LAUNCH BUTTON
   let launch_button = document.createElement("input");
   launch_button.type="button"
@@ -225,21 +280,7 @@ function appendCardDiv(dataset_name){
     launchDataset(dataset_name);
   });
   
-  newDiv.appendChild(launch_button);    
-
-  //DELETE BUTTON
-  let delete_button = document.createElement("input");
-  delete_button.type="button"
-  delete_button.id=`delete_button_${dataset_name}`
-  delete_button.value="delete"
-  delete_button.className="btn btn-danger"
-  delete_button.disabled=true;
-  delete_button.addEventListener('click', function(){
-    deleteDataset(dataset_name);
-  });
-    
-  newDiv.appendChild(delete_button);
-
+  newDiv.appendChild(launch_button);
 
   //APPENDING NEW DATASET TO DATASETS
   document.getElementById("datasets").appendChild(newDiv);
@@ -261,7 +302,7 @@ function updateStatus(dataset,status){
     document.getElementById(`launch_button_${dataset}`).disabled=false;
     document.getElementById(`delete_button_${dataset}`).disabled=false;
   }
-  else{
+  else if (status=='error'){
     document.getElementById('progress_'+dataset).style="width:100%"
     document.getElementById('progress_'+dataset).className ="progress-bar bg-error"
     document.getElementById('progress_'+dataset).innerHTML="internal error!, delete and resubmit"

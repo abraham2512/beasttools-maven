@@ -4,11 +4,15 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import models.DataFileDAL
-import edu.ucr.cs.bdlab.beast.{ReadWriteMixinFunctions, SpatialRDD}
 import edu.ucr.cs.bdlab.beast.common.BeastOptions
-import edu.ucr.cs.bdlab.beast.indexing.RSGrovePartitioner
+import edu.ucr.cs.bdlab.beast.io.{SpatialCSVSource, SpatialReader}
+import edu.ucr.cs.bdlab.beast.io.SpatialReader.{dataFrameToSpatialRDD, readInput}
 import edu.ucr.cs.bdlab.davinci.{GeometricPlotter, MultilevelPlot}
-import utils.SparkFactory.sc
+import org.apache.spark.sql.SaveMode
+import utils.SparkFactory.{sparkContext, sparkSession}
+
+import scala.reflect.io.{Directory, File}
+
 
 object HdfsActor {
 
@@ -17,7 +21,8 @@ object HdfsActor {
 
   val HdfsKey: ServiceKey[HdfsCommand] = ServiceKey("HDFS_ACTOR")
 
-  final case class PartitionToHDFS(file: DataFile) extends HdfsCommand
+  final case class CreateVizIndexFromDF(file: DataFile) extends HdfsCommand
+  final case class CreateDFSource(file: DataFile) extends  HdfsCommand
   final case class SpeakText(msg: String) extends HdfsCommand
 
   def apply(): Behavior[HdfsCommand] = Behaviors.setup {
@@ -31,33 +36,50 @@ object HdfsActor {
           println(s"actors.HdfsActor: got a msg: $msg")
           Behaviors.same
 
-        case PartitionToHDFS(file) =>
-
+        case CreateDFSource(file) =>
+          println("actors.HdfsActor: starting datasource API")
           try {
-            println("actors.HdfsActor: Started file " + file.filename)
-            DataFileDAL.update_status(file.filename, filestatus = "downloading")
-
-            //Partitioning the data and storing as r-tree
-            val partitioned_data: SpatialRDD = sc.spatialFile(file.filesource).spatialPartition(classOf[RSGrovePartitioner])
-            partitioned_data.writeSpatialFile(filename = "data/indexed/" + file.filename, oformat = "rtree")
-            println("actors.HdfsActor: Partitioning complete")
+            val input = file.filesource
+            val input_df  = sparkSession.read.format("geojson").load(input)
+            val schema = input_df.schema
+            println(schema.size)
+            println(schema.fields.mkString(","))
+            println(input_df.count())
+            val df_outPath = "data/datasource/" + file.filename
+            if (Directory(df_outPath).exists){
+              File(df_outPath).deleteRecursively()
+              println("actors.HdfsActor: Existing folder with same name deleted")
+            }
+            input_df.write.format("geojson").mode(SaveMode.Overwrite).save(df_outPath)
+            println("actors.HdfsActor: Dataframes created with Datasource API")
             DataFileDAL.update_status(file.filename, filestatus = "partitioned")
+          }
+          catch {
+            case e:Exception =>
+              println("actors.HdfsActor: "+e.toString)
+              DataFileDAL.update_status(file.filename, filestatus = "error")
+          }
+          Behaviors.same
 
-            //Building multilevel visualization
-            val features = sc.spatialFile(filename = "data/indexed/" + file.filename)
+        case CreateVizIndexFromDF(file) =>
+          try {
+            println("actors.HdfsActor: Converting file " + file.filename + " to RDD")
+            val input_path = "data/datasource/" + file.filename
+            val input_df  = sparkSession.read.format("geojson").load(input_path)
+            val features = SpatialReader.dataFrameToSpatialRDD(input_df)
+            println("actors.HdfsActor: RDD loaded from "+ file.filename)
             val opts = new BeastOptions(false)
             opts.set(MultilevelPlot.ImageTileThreshold, 0)
             opts.set("mercator", true)
             opts.set("stroke", "blue")
             opts.set("data-tiles", true)
             opts.set("iformat", "rtree")
-            opts.set("data", "../../indexed/" + file.filename)
+            opts.set("data", "../../datasource/" + file.filename)
             //opts.set("threshold","1m")
             val outPath = "data/viz/" + file.filename
             val inputPath = " "
             MultilevelPlot.plotFeatures(features, levels = 0 until 16, classOf[GeometricPlotter], inputPath, outPath, opts)
-
-            println("actors.HdfsActor: Multilevel indexing complete")
+            println("actors.HdfsActor: Dataset plotted successfully")
             DataFileDAL.update_status(file.filename, filestatus = "indexed")
             HDFSActionPerformed("Success")
             Behaviors.same
@@ -68,12 +90,10 @@ object HdfsActor {
               Behaviors.same
             case e: Exception =>
               println("actors.HdfsActor: Error :" + e.toString)
-              DataFileDAL.update_status(file.filename, filestatus = "Partitioning error, check log")
+              DataFileDAL.update_status(file.filename, filestatus = "error")
               HDFSActionPerformed("Failure")
               Behaviors.same
           } finally {
-            //println("Good Bye!")
-            //spark.stop()
             HDFSActionPerformed("Exit")
             Behaviors.same
           }

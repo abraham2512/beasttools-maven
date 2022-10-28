@@ -10,9 +10,9 @@ import edu.ucr.cs.bdlab.davinci.{MultilevelPyramidPlotHelper, TileIndex}
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.types.{IntegerType, StringType}
-import utils.SparkFactory.sc
-import org.json4s.native.Json
+import utils.SparkFactory.sparkContext
 import org.json4s.DefaultFormats
+import org.json4s.jackson.Json
 
 object TileActor {
 
@@ -38,7 +38,7 @@ object TileActor {
             val tileID = TileIndex.encode(z.toInt, x.toInt, y.toInt)
             //val tileIndexPath = new Path("data/indexed", dataset)
             val tileVizPath = new Path("data/viz")
-            val fileSystem = tileVizPath.getFileSystem(sc.hadoopConfiguration)
+            val fileSystem = tileVizPath.getFileSystem(sparkContext.hadoopConfiguration)
             val datasetPath = new Path(tileVizPath,dataset)
             if (fileSystem.exists(datasetPath)){
               val interimOutput = new ByteArrayOutputStream()
@@ -61,10 +61,10 @@ object TileActor {
 
         case GetMetaData(dataset: String, mbrString:String,replyTo) =>
           val opts = new BeastOptions(loadDefaults = false)
-          val datapath = "data/indexed/"+dataset
+          val datapath = "data/datasource/"+dataset
           val featureReaderClass = SpatialFileRDD.getFeatureReaderClass(datapath,opts)
           println(featureReaderClass)
-          val partitions = SpatialFileRDD.createPartitions(datapath, opts,sc.hadoopConfiguration)
+          val partitions = SpatialFileRDD.createPartitions(datapath, opts,sparkContext.hadoopConfiguration)
           println(dataset+"->"+mbrString)
           var mbrs:Array[EnvelopeNDLite] = null
           var mbr:EnvelopeNDLite = null

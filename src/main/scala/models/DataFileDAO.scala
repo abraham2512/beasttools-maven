@@ -2,13 +2,16 @@ package models
 
 import slick.jdbc.JdbcProfile
 
+import java.util.UUID
+
 class DataFileDAO(val profile: JdbcProfile) {
   // Import the Scala API from the profile
   import profile.api._
   //#dao
 
   class Props(tag: Tag) extends Table[(String, String, String, String)](tag, "PROPS") {
-    def id = column[Option[Int]]("id",O.PrimaryKey,O.AutoInc)
+    def id = column[Option[Int]]("id", O.AutoInc)
+    def uuid = column[UUID]("uuid", O.PrimaryKey)
     def filename = column[String]("filename")
     def filetype = column[String]("filetype")
     def filesource = column[String]("filesource")
@@ -41,6 +44,10 @@ class DataFileDAO(val profile: JdbcProfile) {
   def delete(filename: String): DBIO[Int] = {
     props.filter(_.filename === filename).delete
   }
+
+  def get_uuid(filename: String): DBIO[Option[UUID]] =
+    (for(p <- props if p.filename === filename) yield p.uuid ).result.headOption
+
 
   /** Get the first element for a Query from this DAO */
 //  def getFirst[M, U, C[_]](q: Query[M, U, C]): DBIO[U] =

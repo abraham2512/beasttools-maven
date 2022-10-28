@@ -35,8 +35,9 @@ object StartApp {
         //println("Pre Actors Routine")
         //if (File("application.conf").exists) println("FOUND APP CONF") else println("NOPE")
         if(!Directory("data").exists){
-          new java.io.File("data/indexed").mkdirs
+          //new java.io.File("data/indexed").mkdirs
           new java.io.File("data/viz").mkdirs
+          new java.io.File("data/datasource").mkdirs
           println("root: Creating rtree/tiles directories")
         }
         println("root: Starting actor system")

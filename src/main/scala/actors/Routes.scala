@@ -41,6 +41,9 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
   def getFile(filename: String): Future[DataFile] =
     fileRegistry.ask(GetFile(filename, _))
 
+  def createIndex(file: DataFile): Future[FileActionPerformed] =
+    fileRegistry.ask(CreateIndex(file,_))
+
   def getTile(dataset: String,tile: (String,String,String)): Future[Array[Byte]] =
     tileActor.ask(GetTile(dataset,tile,_))
 
@@ -117,7 +120,13 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
                           complete((StatusCodes.Accepted, performed))
                         }
                       }
-
+                    },
+                    put {
+                      entity(as[DataFile]) { file =>
+                        onSuccess(createIndex(file)) { performed =>
+                          complete((StatusCodes.Created, performed))
+                        }
+                      }
                     }
                   )
                 },

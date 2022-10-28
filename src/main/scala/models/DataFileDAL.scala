@@ -5,6 +5,7 @@ import slick.dbio.DBIO
 import slick.jdbc.H2Profile
 import slick.jdbc.JdbcBackend.Database
 
+import java.util.UUID
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
@@ -40,10 +41,16 @@ object DataFileDAL {
     Await.result(file, Duration.Inf)
   }
 
+  def get_uuid(k: String): Option[UUID] = {
+    val uuid: Future[Option[UUID]] = db.run(dao.get_uuid(k).withPinnedSession)
+    Await.result(uuid,Duration.Inf)
+  }
+
   def update_status(filename: String, filestatus: String): Int = {
     val update = db.run(dao.update_status(filename, filestatus).withPinnedSession)
     Await.result(update, Duration.Inf)
   }
+
   def delete_file(filename:String) :Int = {
     val delete = db.run(dao.delete(filename).withPinnedSession)
     Await.result(delete,Duration.Inf)
