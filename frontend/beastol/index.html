@@ -27,8 +27,9 @@
   <!--          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">-->
   <!--            <span class="navbar-toggler-icon"></span>-->
   <!--          </button>-->
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">New Data</button>
-  
+            <button type="button" class="btn btn-light" data-toggle="modal" data-target="#exampleModal">Insert</button>
+            <button type="button" class="btn btn-light" data-toggle="modal" data-target="#exampleModal2">Query</button>
+
             <div class="collapse navbar-collapse" id="navbarText">
               <!-- <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
@@ -54,10 +55,17 @@
       <div id="map_div" class="child2">
 
       <div id="map"></div>  
+      
+      
+      
       <div id="popup" class="ol-popup" style="display: none;" >
         <a href="" id="popup-closer" class="ol-popup-closer"></a>
         <div id="popup-content"></div>
       </div>
+
+
+
+      <!-- NEW DATASET MODAL -->
       <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
@@ -88,6 +96,41 @@
           </div>
         </div>
       </div>
+
+
+      <!-- QUERY MODAL -->
+
+      <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModal2Label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModal2Label">Run Query</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form_div">
+                <form id="queryinputform">
+                <div class="form-group">  
+                  <label for="query_dataset_name" class="col-form-label">Dataset:</label>
+                  <input class="form-control" id="query_dataset_name" type="text" required>
+                </div>
+                <div class="form-group">
+                  <label for="query_run" class="col-form-label">Query:</label>
+                  <input class="form-control" id="query_run" type="text" required>
+              </div>  
+                </form>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button id="query_submit" type="button" data-dismiss="modal" class="btn btn-primary">Run Query</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       </div>
     </div>
 

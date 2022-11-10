@@ -131,10 +131,8 @@ function launchDataset(filename){
     source: new XYZ({
       url:
         "http://127.0.0.1:8080/tiles/?dataset="+ filename +"&z={z}&x={x}&y={y}"
-    }),
-    
+    }),  
   });
-  
   let layers = map.getLayers();
   if(layers.array_.length == 2){
     map.removeLayer(map.getLayers().array_[1])
@@ -181,7 +179,7 @@ function indexDataset(dataset_name) {
 
 
 }
-
+// CREATE DATASET
 function handleDataFileSubmit(event) {
   event.preventDefault();
   console.log("Function called");
@@ -206,6 +204,27 @@ function handleDataFileSubmit(event) {
   
 }
 
+
+// RUN QUERY
+function handleRunQuery(event){
+  event.preventDefault();
+  console.log("Function called");
+  let dataset_name = document.getElementById("query_dataset_name").value;
+  let query_run = document.getElementById("query_run").value
+   //appendCardDiv(filename);
+  
+  console.log(dataset_name,query_run);
+   axios.post('http://127.0.0.1:8080/query',{
+    dataset : dataset_name,
+    query : query_run
+  })
+  .catch(function(error){
+    console.log("Error submitting dataset "+error)
+  });
+}
+
+
+//APPENDING DATASETS
 function appendCardDiv(dataset_name){
   console.log("Appending "+dataset_name);
 
@@ -231,17 +250,17 @@ function appendCardDiv(dataset_name){
   newDiv.appendChild(progress_div);
 
     //QUERY BUTTON
-    let query_button = document.createElement("input");
-    query_button.type="button"
-    query_button.id=`delete_button_${dataset_name}`
-    query_button.value="query"
-    query_button.className="btn btn-info"
-    query_button.disabled=false;
-    query_button.addEventListener('click', function(){
-      console.log("Running query");
-    });
+  //   let query_button = document.createElement("input");
+  //   query_button.type="button"
+  //   query_button.id=`delete_button_${dataset_name}`
+  //   query_button.value="query"
+  //   query_button.className="btn btn-info"
+  //   query_button.disabled=false;
+  //   query_button.addEventListener('click', function(){
+  //     console.log("Running query");
+  //   });
 
-  newDiv.appendChild(query_button);
+  // newDiv.appendChild(query_button);
 
     //DELETE BUTTON
     let delete_button = document.createElement("input");
@@ -337,4 +356,5 @@ document.addEventListener("DOMContentLoaded",function(){
 });
 
 document.getElementById('dataset_submit').addEventListener('click',handleDataFileSubmit)
+document.getElementById('query_submit').addEventListener('click',handleRunQuery)
 window.onload=launchMap();
