@@ -19,6 +19,10 @@ case class DataFile(filename:String, filetype:String, filesource:String, filesta
 }
 final case class DataFiles(files: Seq[DataFile])
 
+case class Query(dataset:String, query:String){
+  def apply(dataset:String, query:String): Query = { Query(dataset,query) }
+}
+
 //The Routing Logic class
 class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[TileActor.TileCommand])(implicit val system: ActorSystem[_]) {
 
@@ -50,6 +54,8 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
   def getTileMeta(dataset: String, mbrString: String): Future[String] =
     tileActor.ask(GetMetaData(dataset,mbrString,_))
 
+  def runQuery(query: Query): Future[FileActionPerformed] =
+    fileRegistry.ask(StartQuery(query,_))
 
   //This function handles situations when the tile could not be generated on the fly
   private val tileOnTheFlyHandler = RejectionHandler.newBuilder
@@ -63,7 +69,7 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
     import CorsDirectives._
     val rejectionHandler = corsRejectionHandler.withFallback(RejectionHandler.default)
 
-    // Your exception handler
+    // Exception handler
     val exceptionHandler = ExceptionHandler {
       case e: NoSuchElementException => complete(StatusCodes.NotFound -> e.getMessage)
     }
@@ -105,6 +111,20 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
               }
             }
           } ~
+            pathPrefix("query") {
+              concat(
+                pathEnd {
+                  post {
+                    entity(as[Query]) {query =>
+                      onSuccess(runQuery(query)) { performed =>
+                        complete((StatusCodes.Accepted))
+                      }
+
+                    }
+                  }
+                }
+              )
+            } ~
             pathPrefix("files") {
               concat(
                 /* ROUTES TO CREATE AND GET BIG DATA FILES */

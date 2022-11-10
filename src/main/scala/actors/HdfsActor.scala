@@ -5,9 +5,11 @@ import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import models.DataFileDAL
 import edu.ucr.cs.bdlab.beast.common.BeastOptions
+import edu.ucr.cs.bdlab.beast.indexing.RSGrovePartitioner
 import edu.ucr.cs.bdlab.beast.io.{SpatialCSVSource, SpatialReader}
 import edu.ucr.cs.bdlab.beast.io.SpatialReader.{dataFrameToSpatialRDD, readInput}
 import edu.ucr.cs.bdlab.davinci.{GeometricPlotter, MultilevelPlot}
+import org.apache.http.impl.cookie.BasicExpiresHandler
 import org.apache.spark.sql.SaveMode
 import utils.SparkFactory.{sparkContext, sparkSession}
 
@@ -24,6 +26,7 @@ object HdfsActor {
   final case class CreateVizIndexFromDF(file: DataFile) extends HdfsCommand
   final case class CreateDFSource(file: DataFile) extends  HdfsCommand
   final case class SpeakText(msg: String) extends HdfsCommand
+  final case class StartQueryAndSave(query: Query) extends HdfsCommand
 
   def apply(): Behavior[HdfsCommand] = Behaviors.setup {
     context: ActorContext[HdfsCommand] =>
@@ -40,7 +43,7 @@ object HdfsActor {
           println("actors.HdfsActor: starting datasource API")
           try {
             val input = file.filesource
-            val input_df  = sparkSession.read.format("geojson").load(input)
+            val input_df = sparkSession.read.format("geojson").load(input)
             val schema = input_df.schema
             println(schema.size)
             println(schema.fields.mkString(","))
@@ -66,7 +69,9 @@ object HdfsActor {
             println("actors.HdfsActor: Converting file " + file.filename + " to RDD")
             val input_path = "data/datasource/" + file.filename
             val input_df  = sparkSession.read.format("geojson").load(input_path)
-            val features = SpatialReader.dataFrameToSpatialRDD(input_df)
+            val input_rdd = SpatialReader.dataFrameToSpatialRDD(input_df)
+            //Partition
+            val features = input_rdd.spatialPartition(classOf[RSGrovePartitioner])
             println("actors.HdfsActor: RDD loaded from "+ file.filename)
             val opts = new BeastOptions(false)
             opts.set(MultilevelPlot.ImageTileThreshold, 0)
@@ -97,6 +102,17 @@ object HdfsActor {
             HDFSActionPerformed("Exit")
             Behaviors.same
           }
+
+
+
+        case StartQueryAndSave(query) => {
+          println(query)
+          val input_path = "data/datasource/" + query.dataset
+          val input_df  = sparkSession.read.format("geojson").load(input_path)
+
+
+          Behaviors.same
+        }
         case _ => println("actors.HdfsActor: default case")
           Behaviors.same
       }

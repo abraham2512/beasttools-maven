@@ -27,9 +27,13 @@ object FileRegistry {
   final case class GetFile(filename: String,replyTo: ActorRef[DataFile]) extends Command
   final case class DeleteFile(filename: String, replyTo: ActorRef[FileActionPerformed]) extends Command
   final case class CreateIndex(file: DataFile, replyTo: ActorRef[FileActionPerformed]) extends Command
+  final case class StartQuery(query:Query, replyTo: ActorRef[FileActionPerformed]) extends Command
+
 
   final case class CreateDataFrameFromSource(listing: Listing, file: DataFile) extends Command
   final case class CreateVisualizationIndex(listing: Listing, file: DataFile) extends Command
+  final case class StartQueryInHDFS(listing: Listing, query:Query) extends Command
+
 
   def apply(): Behavior[Command]  = Behaviors.setup {
     println("actors.FileRegistry: actors.Routes awake")
@@ -109,9 +113,19 @@ object FileRegistry {
           replyTo ! FileActionPerformed(s"indexed")
           Behaviors.same
 
-
-
-
+        case StartQuery(query,replyTo) =>
+          implicit val timeout: Timeout = 1.second
+          context.ask(context.system.receptionist,Find(HdfsActor.HdfsKey))
+          {
+            case Success(listing:Listing) =>
+            FileRegistry.StartQueryInHDFS(listing,query)
+//              FileRegistry.CreateVisualizationIndex(listing,file)
+            //FileRegistry.CreateVisualizationIndex(listing,file)
+            case Failure(_)=>
+              FileRegistry.FileActionPerformed("No HDFS Actor, could not query dataset")
+          }
+          replyTo ! FileActionPerformed(s"indexed")
+          Behaviors.same
 
         //MESSAGES TO HDFS ACTOR
         case CreateDataFrameFromSource(listing,file) =>
@@ -135,6 +149,18 @@ object FileRegistry {
           hdfsActor.foreach { m =>
             //  m ! HdfsActor.PartitionToHDFS(file) #RDD API
             m ! HdfsActor.CreateVizIndexFromDF(file)
+          }
+          Behaviors.same
+
+        case StartQueryInHDFS(listing,query) =>
+          println("actors.FileRegistry: Started running query")
+          val instances: Set[ActorRef[HdfsActor.HdfsCommand]] =
+            listing.serviceInstances(HdfsActor.HdfsKey)
+          hdfsActor = instances.headOption
+          //println(hdfsActor)
+          hdfsActor.foreach { m =>
+            //  m ! HdfsActor.PartitionToHDFS(file) #RDD API
+            m ! HdfsActor.StartQueryAndSave(query)
           }
           Behaviors.same
 
