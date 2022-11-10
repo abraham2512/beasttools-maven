@@ -28,6 +28,7 @@ A Scala object can be made into an Akka actor simply by importing `akka.actor.ty
 A simple example would be
 
 ```
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 object MyActor{
 
     def apply(): Behavior[CommandTrait] = Behaviors.setup {
