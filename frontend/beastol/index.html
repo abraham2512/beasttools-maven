@@ -65,12 +65,12 @@
 
 
 
-      <!-- NEW DATASET MODAL -->
+      <!-- INSERT DATASET MODAL -->
       <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Add New Dataset</h5>
+              <h5 class="modal-title" id="exampleModalLabel">Insert Dataset</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -119,7 +119,11 @@
                 <div class="form-group">
                   <label for="query_run" class="col-form-label">Query:</label>
                   <input class="form-control" id="query_run" type="text" required>
-              </div>  
+              </div>
+                <div class="form-group">
+                  <input type="checkbox" id="save_as_new_dataset" name="save_as_new_dataset" value="">
+                  <label for="save_as_new_dataset"> Save as new dataset</label><br>
+                </div>  
                 </form>
               </div>
             </div>

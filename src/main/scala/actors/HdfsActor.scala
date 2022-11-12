@@ -102,15 +102,27 @@ object HdfsActor {
             HDFSActionPerformed("Exit")
             Behaviors.same
           }
-
-
-
         case StartQueryAndSave(query) => {
           println(query)
-          val input_path = "data/datasource/" + query.dataset
-          val input_df  = sparkSession.read.format("geojson").load(input_path)
-
-
+          try {
+            val input_path = "data/datasource/" + query.dataset
+            val input_df  = sparkSession.read.format("geojson").load(input_path)
+            input_df.createOrReplaceTempView(query.dataset)
+            var df_outPath = "data/datasource/" + query.dataset
+            if (query.saveMode=="true") {
+              df_outPath = df_outPath + "query"
+            }
+              if (Directory(df_outPath).exists){
+                File(df_outPath).deleteRecursively()
+                println("actors.HdfsActor: Existing folder with same name deleted")
+              }
+              sparkSession.sql(query.query).write.format("geojson").mode(SaveMode.Overwrite).save(df_outPath)
+          } catch {
+            case e: NullPointerException =>
+              println("actors.HdfsActor: Dataset does not exist :" + e.toString)
+            case e: Exception =>
+              println("actors.HdfsActor: " + e.toString)
+          }
           Behaviors.same
         }
         case _ => println("actors.HdfsActor: default case")

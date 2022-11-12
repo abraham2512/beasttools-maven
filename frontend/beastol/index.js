@@ -211,12 +211,14 @@ function handleRunQuery(event){
   console.log("Function called");
   let dataset_name = document.getElementById("query_dataset_name").value;
   let query_run = document.getElementById("query_run").value
-   //appendCardDiv(filename);
-  
+  let save_as_new = $("#save_as_new_dataset").is(":checked") ? "true" : "false";
+  //document.getElementById("save_as_new_dataset").value;
+  //appendCardDiv(filename);
   console.log(dataset_name,query_run);
    axios.post('http://127.0.0.1:8080/query',{
     dataset : dataset_name,
-    query : query_run
+    query : query_run,
+    saveMode : save_as_new
   })
   .catch(function(error){
     console.log("Error submitting dataset "+error)
@@ -263,25 +265,25 @@ function appendCardDiv(dataset_name){
   // newDiv.appendChild(query_button);
 
     //DELETE BUTTON
-    let delete_button = document.createElement("input");
+    let delete_button = document.createElement("input")
     delete_button.type="button"
     delete_button.id=`delete_button_${dataset_name}`
     delete_button.value="delete"
     delete_button.className="btn btn-danger"
-    delete_button.disabled=false;
+    delete_button.disabled=false
     delete_button.addEventListener('click', function(){
-    deleteDataset(dataset_name);
+    deleteDataset(dataset_name)
     });
 
   newDiv.appendChild(delete_button);
 
   //INDEX BUTTON
-  let index_button = document.createElement("input");
+  let index_button = document.createElement("input")
   index_button.type="button"
   index_button.id=`index_button_${dataset_name}`
   index_button.value="index"
   index_button.className="btn btn-primary"
-  index_button.disabled=false;
+  index_button.disabled=false
   index_button.addEventListener('click', function(){
     indexDataset(dataset_name);
   });
@@ -324,8 +326,8 @@ function updateStatus(dataset,status){
   else if (status=='error'){
     document.getElementById('progress_'+dataset).style="width:100%"
     document.getElementById('progress_'+dataset).className ="progress-bar bg-error"
-    document.getElementById('progress_'+dataset).innerHTML="internal error!, delete and resubmit"
-    //document.getElementById(`launch_button_${dataset}`).disabled=true;
+    document.getElementById('progress_'+dataset).innerHTML="pls delete and resubmit"
+    document.getElementById(`launch_button_${dataset}`).disabled=true;
     document.getElementById(`delete_button_${dataset}`).disabled=false;
   }
 
@@ -355,6 +357,6 @@ document.addEventListener("DOMContentLoaded",function(){
   },10000)
 });
 
-document.getElementById('dataset_submit').addEventListener('click',handleDataFileSubmit)
-document.getElementById('query_submit').addEventListener('click',handleRunQuery)
+document.getElementById('dataset_submit').addEventListener('click',handleDataFileSubmit);
+document.getElementById('query_submit').addEventListener('click',handleRunQuery);
 window.onload=launchMap();

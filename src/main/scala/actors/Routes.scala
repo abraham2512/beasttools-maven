@@ -9,6 +9,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{ExceptionHandler, RejectionHandler, Route, ValidationRejection}
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives
+import org.apache.spark.sql.SaveMode
 
 import scala.concurrent.Future
 import scala.reflect.io.File
@@ -19,8 +20,8 @@ case class DataFile(filename:String, filetype:String, filesource:String, filesta
 }
 final case class DataFiles(files: Seq[DataFile])
 
-case class Query(dataset:String, query:String){
-  def apply(dataset:String, query:String): Query = { Query(dataset,query) }
+case class Query(dataset:String, query:String, saveMode:String){
+  def apply(dataset:String, query:String, saveMode: String): Query = { Query(dataset,query,saveMode) }
 }
 
 //The Routing Logic class
