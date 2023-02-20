@@ -49,6 +49,9 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
   def createIndex(file: DataFile): Future[FileActionPerformed] =
     fileRegistry.ask(CreateIndex(file,_))
 
+  def generateSummary(filename: String): Future[FileActionPerformed] =
+    fileRegistry.ask(StartSummaryGen(filename,_))
+
   def getTile(dataset: String,tile: (String,String,String)): Future[Array[Byte]] =
     tileActor.ask(GetTile(dataset,tile,_))
 
@@ -171,6 +174,19 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
                   )
                 }
               )
+          } ~
+          pathPrefix("summary"){
+            pathEnd {
+              concat(
+                put {
+                  parameters("filename") { filename =>
+                    onSuccess(generateSummary(filename)) { performed =>
+                      complete((StatusCodes.Accepted, performed)) // TODO check for errors?
+                    }
+                  }
+                }
+              )
+            }
             }
         }
       }

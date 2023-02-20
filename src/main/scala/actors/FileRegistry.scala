@@ -6,12 +6,18 @@ import akka.actor.typed.receptionist.ServiceKey
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.util.Timeout
+import edu.ucr.cs.bdlab.beast.ReadWriteMixinFunctions
+import edu.ucr.cs.bdlab.beast.geolite.IFeature
 import models.DataFileDAL
 import org.apache.commons.io.FileUtils
+import org.apache.spark.rdd.RDD
 
 import java.io.{File, FileNotFoundException}
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
+import utils.SparkFactory.sparkContext
+
+import scala.collection.mutable.ArrayBuffer
 
 object FileRegistry {
   //#actor protocol
@@ -27,11 +33,13 @@ object FileRegistry {
   final case class GetFile(filename: String,replyTo: ActorRef[DataFile]) extends Command
   final case class DeleteFile(filename: String, replyTo: ActorRef[FileActionPerformed]) extends Command
   final case class CreateIndex(file: DataFile, replyTo: ActorRef[FileActionPerformed]) extends Command
+  final case class StartSummaryGen(filename: String, replyTo: ActorRef[FileActionPerformed]) extends Command
   final case class StartQuery(query:Query, replyTo: ActorRef[FileActionPerformed]) extends Command
 
 
   final case class CreateDataFrameFromSource(listing: Listing, file: DataFile) extends Command
   final case class CreateVisualizationIndex(listing: Listing, file: DataFile) extends Command
+  final case class CreateSummary(filename: String) extends Command
   final case class StartQueryInHDFS(listing: Listing, query:Query) extends Command
 
 
@@ -112,6 +120,84 @@ object FileRegistry {
           }
           replyTo ! FileActionPerformed(s"indexed")
           Behaviors.same
+
+        case StartSummaryGen(filename, replyTo) =>
+          println("actors.FileRegistry: Starting file summary generation") // TODO remove?
+          implicit val timeout: Timeout = 1.second
+          context.self ! CreateSummary(filename)
+          replyTo ! FileActionPerformed("summarization_started")
+          Behaviors.same
+
+        case CreateSummary(filename) =>
+          println("actors.FileRegistry: Creating file summary")
+          try {
+            val input = "data/datasource/" + filename
+            val inputFeatures = sparkContext.shapefile(input)
+            val summary = inputFeatures.summary
+
+            var return_map: Map[String, Any] = Map()
+            val size = if (summary.size <= Integer.MAX_VALUE) summary.size.toInt else summary.size
+            return_map += ("size" -> size)
+            val num_features = if (summary.numFeatures <= Integer.MAX_VALUE) summary.numFeatures.toInt else summary.numFeatures
+            return_map += ("num_features" -> num_features)
+            val num_points = if (summary.numPoints <= Integer.MAX_VALUE) summary.numPoints.toInt else summary.numPoints
+            return_map += ("num_points" -> num_points)
+            return_map += ("geometry_type" -> summary.geometryType.toString)
+
+            val mbr = new Array[Double](4)
+            mbr(0) = summary.getMinCoord(0)
+            mbr(1) = summary.getMinCoord(1)
+            mbr(2) = summary.getMaxCoord(0)
+            mbr(3) = summary.getMaxCoord(1)
+            return_map += ("extent" -> mbr)
+
+            val avgSideLength = new Array[Double](2)
+            avgSideLength(0) = summary.averageSideLength(0)
+            avgSideLength(1) = summary.averageSideLength(1)
+            return_map += ("avg_sidelength" -> avgSideLength)
+            println(summary.averageSideLength(0)) // TODO remove
+
+            // 2- Add attribute information
+
+            val inputFeatures2: RDD[IFeature] = sparkContext.shapefile(input)
+            val sampleFeature: IFeature = inputFeatures2.first // TODO change var name
+            if (sampleFeature.length > 1) {
+              val attributes = ArrayBuffer[Map[String, String]]()
+              import scala.collection.JavaConversions._
+              for (iAttr <- sampleFeature.iNonGeomJ) {
+                var attribute: Map[String, String] = Map[String, String]()
+                attribute += ("name" -> sampleFeature.getName(iAttr))
+                val value = sampleFeature.get(iAttr)
+                val valueClass = if (value == null) null
+                else value.getClass
+                var `type`: String = null
+                if (value == null) `type` = "unknown"
+                else if (valueClass eq classOf[String]) `type` = "string"
+                else if ((valueClass eq classOf[Integer]) || (valueClass eq classOf[Long])) `type` = "integer"
+                else if ((valueClass eq classOf[Float]) || (valueClass eq classOf[Double])) `type` = "number"
+                else if (valueClass eq classOf[Boolean]) `type` = "boolean"
+                else `type` = "unknown"
+                attribute += ("type" -> `type`)
+                attributes += attribute
+              }
+              return_map += ("attributes" -> attributes.toArray)
+            }
+            else
+              return_map += ("attributes" -> null)
+
+            println(return_map.mkString("{", ",", "}"))
+
+            // Store to H2DB
+            DataFileDAL.update_summary(filename, return_map)
+            DataFileDAL.update_summary_status(filename, summary_status = "summarized")
+            println("actors.FileRegistry: File summary created!")
+            Behaviors.same
+          } catch {
+            case e: Exception =>
+              println("actors.FileRegistry: Error :" + e.toString)
+              DataFileDAL.update_summary_status(filename, summary_status = "error")
+              Behaviors.same
+          }
 
         case StartQuery(query,replyTo) =>
           implicit val timeout: Timeout = 1.second
