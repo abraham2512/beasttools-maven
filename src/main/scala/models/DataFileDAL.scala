@@ -69,8 +69,18 @@ object DataFileDAL {
     Await.result(update, Duration.Inf)
   }
 
+  def get_summary(filename: String): Option[(Long, Long, Long, String, Array[Double], Array[Double], Array[Map[String, String]])] = {
+    val summary: Future[Option[(Long, Long, Long, String, Array[Double], Array[Double], Array[Map[String, String]])]] = db.run(dao.get_summary(filename).withPinnedSession)
+    Await.result(summary, Duration.Inf)
+  }
+
   def update_summary_status(filename: String, summary_status: String): Int = {
     val update = db.run(dao.update_summary_status(filename, summary_status).withPinnedSession)
     Await.result(update, Duration.Inf)
+  }
+
+  def get_summary_status(filename: String): Option[String] = {
+    val summary_status: Future[Option[String]] = db.run(dao.get_summary_status(filename).withPinnedSession)
+    Await.result(summary_status, Duration.Inf)
   }
 }

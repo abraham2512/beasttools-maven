@@ -34,6 +34,8 @@ object FileRegistry {
   final case class DeleteFile(filename: String, replyTo: ActorRef[FileActionPerformed]) extends Command
   final case class CreateIndex(file: DataFile, replyTo: ActorRef[FileActionPerformed]) extends Command
   final case class StartSummaryGen(filename: String, replyTo: ActorRef[FileActionPerformed]) extends Command
+  final case class GetSummaryStatus(filename: String, replyTo: ActorRef[String]) extends Command
+  final case class GetSummary(filename: String, replyTo: ActorRef[GeneratedSummary]) extends Command
   final case class StartQuery(query:Query, replyTo: ActorRef[FileActionPerformed]) extends Command
 
 
@@ -198,6 +200,35 @@ object FileRegistry {
               DataFileDAL.update_summary_status(filename, summary_status = "error")
               Behaviors.same
           }
+
+        case GetSummaryStatus(filename, replyTo) =>
+          try {
+            val ss = DataFileDAL.get_summary_status(filename)
+            val summary_status = ss.get
+            var returnVal = "false"
+            if (summary_status == "summarized") returnVal = "true"
+            else if (summary_status == "error") returnVal = "error_in_summary"
+            replyTo ! returnVal
+          } catch {
+            case e: Exception =>
+              println("actors.FileRegistry: Error :" + e.toString)
+              replyTo ! "error_in_request"
+          }
+          Behaviors.same
+
+        case GetSummary(filename, replyTo) =>
+          try {
+            val s = DataFileDAL.get_summary(filename)
+            val summary = s.get
+            val returnSummary = GeneratedSummary(summary._1, summary._2, summary._3, summary._4, summary._5, summary._6, summary._7)
+            replyTo ! returnSummary
+          } catch {
+            case e: Exception =>
+              println("actors.FileRegistry: Error :" + e.toString)
+              e.printStackTrace()
+              replyTo ! GeneratedSummary(-1, -1, -1, "", Array[Double](), Array[Double](), Array[Map[String, String]]())
+          }
+          Behaviors.same
 
         case StartQuery(query,replyTo) =>
           implicit val timeout: Timeout = 1.second

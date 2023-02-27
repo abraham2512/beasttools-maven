@@ -73,9 +73,18 @@ class DataFileDAO(val profile: JdbcProfile) {
       .update(size, num_features, num_points, geometry_type, extent, avg_sidelength, attributes)
   }
 
+  def get_summary(filename: String): DBIO[Option[(Long, Long, Long, String, Array[Double], Array[Double], Array[Map[String, String]])]] = {
+    val q = for { p <- props if p.filename === filename } yield p
+    q.map( c => (c.size, c.num_features, c.num_points, c.geometry_type, c.extent, c.avg_sidelength, c.attributes) ).result.headOption
+  }
+
   def update_summary_status(filename: String, summary_status: String): DBIO[Int] = {
     val q = for { p <- props if p.filename === filename } yield p.summary_status
     q.update(summary_status)
+  }
+
+  def get_summary_status(filename: String): DBIO[Option[String]] = {
+    (for(p <- props if p.filename === filename) yield p.summary_status ).result.headOption
   }
 
   /** Get the first element for a Query from this DAO */
