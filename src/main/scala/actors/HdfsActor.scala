@@ -5,15 +5,13 @@ import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import models.DataFileDAL
 import edu.ucr.cs.bdlab.beast.common.BeastOptions
-import edu.ucr.cs.bdlab.beast.indexing.RSGrovePartitioner
-import edu.ucr.cs.bdlab.beast.io.{SpatialCSVSource, SpatialReader}
-import edu.ucr.cs.bdlab.beast.io.SpatialReader.{dataFrameToSpatialRDD, readInput}
+import edu.ucr.cs.bdlab.beast.indexing.{IndexHelper, RSGrovePartitioner}
+import edu.ucr.cs.bdlab.beast.io.{SpatialFileRDD, SpatialReader, SpatialWriter}
+import edu.ucr.cs.bdlab.beast.io.ReadWriteMixin._
 import edu.ucr.cs.bdlab.davinci.{GeometricPlotter, MultilevelPlot}
-import org.apache.http.impl.cookie.BasicExpiresHandler
 import org.apache.spark.sql.SaveMode
 import utils.SparkFactory.{sparkContext, sparkSession}
-import scala.collection.JavaConverters._
-import java.io
+
 import scala.reflect.io.{Directory, File}
 
 
@@ -24,6 +22,7 @@ object HdfsActor {
 
   val HdfsKey: ServiceKey[HdfsCommand] = ServiceKey("HDFS_ACTOR")
 
+  final case class CreateRTreeIndexFromDF(file: DataFile) extends HdfsCommand
   final case class CreateVizIndexFromDF(file: DataFile) extends HdfsCommand
   final case class CreateDFSource(file: DataFile) extends  HdfsCommand
   final case class SpeakText(msg: String) extends HdfsCommand
@@ -86,9 +85,9 @@ object HdfsActor {
           }
           Behaviors.same
 
-        case CreateVizIndexFromDF(file) =>
+        case CreateRTreeIndexFromDF(file) =>
           try {
-            println("actors.HdfsActor: Converting file " + file.filename + " to RDD")
+            println("actors.HdfsActor: Creating RTree index for file: " + file.filename)
             val input_path = "data/datasource/" + file.filename
             //geojson
 //            val input_df  = sparkSession.read.format("geojson").load(input_path)
@@ -102,22 +101,67 @@ object HdfsActor {
             //shapefile
             val input_df = sparkSession.read.format("shapefile").load(input_path)
 
-
-            val input_rdd = SpatialReader.dataFrameToSpatialRDD(input_df)
             //Partition
+            val input_rdd = SpatialReader.dataFrameToSpatialRDD(input_df)
             val features = input_rdd.spatialPartition(classOf[RSGrovePartitioner])
-            println("actors.HdfsActor: RDD loaded from "+ file.filename)
-            val opts = new BeastOptions(false)
-            opts.set(MultilevelPlot.ImageTileThreshold, 0)
-            opts.set("mercator", true)
-            opts.set("stroke", "blue")
-            opts.set("data-tiles", true)
-            opts.set("iformat", "rtree")
-            opts.set("data", "../../datasource/" + file.filename)
-            //opts.set("threshold","1m")
+            val opts2 = Seq( // TODO opts2 -> opts
+              "iformat" -> "shapefile",
+              IndexHelper.BalancedPartitioning -> true,
+              SpatialWriter.OutputFormat -> "rtree",
+              SpatialFileRDD.Recursive -> true
+            )
+            val outPath = "data/indexed/" + file.filename
+
+            IndexHelper.saveIndex2(features, outPath, opts2)
+
+            println("actors.HdfsActor: RTree index created successfully")
+            DataFileDAL.update_status(file.filename, filestatus = "rtree-indexed")
+            HDFSActionPerformed("Success")
+            Behaviors.same
+          } catch {
+            case e: NoClassDefFoundError =>
+              println("actors.HdfsActor: Could not get spark session" + e.toString)
+              HDFSActionPerformed("Failure")
+              Behaviors.same
+            case e: Exception =>
+              println("actors.HdfsActor: Error :" + e.toString)
+              e.printStackTrace()
+              DataFileDAL.update_status(file.filename, filestatus = "error")
+              HDFSActionPerformed("Failure")
+              Behaviors.same
+          } finally {
+            HDFSActionPerformed("Exit")
+            Behaviors.same
+          }
+
+        case CreateVizIndexFromDF(file) =>
+          try {
+            println("actors.HdfsActor: Converting file " + file.filename + " to RDD")
+            val input_path = "data/indexed/" + file.filename
+            //geojson
+            //            val input_df  = sparkSession.read.format("geojson").load(input_path)
+
+            //csv
+
+            //            val input_df = SpatialCSVSource.read(sparkSession, input_path, Seq(SpatialCSVSource.GeometryType -> "point",
+            //              "header" -> "true", SpatialCSVSource.DimensionColumns -> "x,y", "delimiter" -> " ").toMap.asJava)
+
+
+            //shapefile
+            //            val input_dff = sparkSession.read.format("rtree").load(input_path)
+
+
+            val input_rdd = sparkContext.spatialFile(input_path)
+
+            val opts3 = new BeastOptions(false)
+            opts3.setInt(MultilevelPlot.ImageTileThreshold, 500000)
+            opts3.setBoolean("data-tiles", false)
+            opts3.setBoolean("mercator", true)
+            opts3.set("stroke", "blue")
+
             val outPath = "data/viz/" + file.filename
-            val inputPath = " "
-            MultilevelPlot.plotFeatures(features, levels = 0 until 16, classOf[GeometricPlotter], inputPath, outPath, opts)
+
+            MultilevelPlot.plotFeatures(input_rdd, levels = 0 until 20, classOf[GeometricPlotter], input_path, outPath, opts3)
             println("actors.HdfsActor: Dataset plotted successfully")
             DataFileDAL.update_status(file.filename, filestatus = "indexed")
             HDFSActionPerformed("Success")
@@ -129,6 +173,7 @@ object HdfsActor {
               Behaviors.same
             case e: Exception =>
               println("actors.HdfsActor: Error :" + e.toString)
+              e.printStackTrace()
               DataFileDAL.update_status(file.filename, filestatus = "error")
               HDFSActionPerformed("Failure")
               Behaviors.same

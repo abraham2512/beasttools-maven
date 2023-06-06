@@ -24,6 +24,10 @@ case class Query(dataset:String, query:String, saveMode:String){
   def apply(dataset:String, query:String, saveMode: String): Query = { Query(dataset,query,saveMode) }
 }
 
+case class GeneratedSummary(size: Long, num_features: Long, num_points: Long, geometry_type: String, extent: Array[Double], avg_sidelength: Array[Double], attributes: Array[Map[String, String]]) {
+  def apply(size: Long, num_features: Long, num_points: Long, geometry_type: String, extent: Array[Double], avg_sidelength: Array[Double], attributes: Array[Map[String, String]]): GeneratedSummary = { GeneratedSummary(size, num_features, num_points, geometry_type, extent, avg_sidelength, attributes)}
+}
+
 //The Routing Logic class
 class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[TileActor.TileCommand])(implicit val system: ActorSystem[_]) {
 
@@ -46,8 +50,20 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
   def getFile(filename: String): Future[DataFile] =
     fileRegistry.ask(GetFile(filename, _))
 
+  def createRTreeIndex(file: DataFile): Future[FileActionPerformed] =
+    fileRegistry.ask(CreateRTreeIndex(file,_))
+
   def createIndex(file: DataFile): Future[FileActionPerformed] =
     fileRegistry.ask(CreateIndex(file,_))
+
+  def generateSummary(filename: String): Future[FileActionPerformed] =
+    fileRegistry.ask(StartSummaryGen(filename,_))
+
+  def getSummaryStatus(filename: String): Future[String] =
+    fileRegistry.ask(GetSummaryStatus(filename,_))
+
+  def getSummary(filename: String): Future[GeneratedSummary] =
+    fileRegistry.ask(GetSummary(filename,_))
 
   def getTile(dataset: String,tile: (String,String,String)): Future[Array[Byte]] =
     tileActor.ask(GetTile(dataset,tile,_))
@@ -171,6 +187,49 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
                   )
                 }
               )
+            } ~
+          pathPrefix("index"){
+            pathEnd {
+              post {
+                entity(as[DataFile]) { file =>
+                  onSuccess(createRTreeIndex(file)) { performed =>
+                    complete((StatusCodes.Accepted, performed))
+                  }
+                }
+              }
+            }
+          } ~
+          pathPrefix("summary"){
+            pathEnd {
+              concat(
+                put {
+                  parameters("filename") { filename =>
+                    onSuccess(generateSummary(filename)) { performed =>
+                      complete((StatusCodes.Accepted, performed)) // TODO check for errors?
+                    }
+                  }
+                }
+                ,
+                get {
+                  parameters("filename") { (filename) =>
+                    onSuccess( getSummary(filename) ) { summary =>
+                      complete(StatusCodes.OK, summary) // TODO handle errors
+                    }
+                  }
+                }
+              )
+            }
+          } ~
+          pathPrefix("summary_status") {
+            pathEnd {
+              get {
+                parameters("filename") { (filename) =>
+                  onSuccess(getSummaryStatus(filename)) { status =>
+                    complete(StatusCodes.OK, status)
+                  }
+                }
+              }
+            }
             }
         }
       }

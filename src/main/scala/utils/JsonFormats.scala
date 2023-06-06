@@ -1,10 +1,8 @@
 package utils
 
 import actors.FileRegistry.FileActionPerformed
-import actors.DataFile
-import actors.DataFiles
+import actors.{DataFile, DataFiles, GeneratedSummary, Query}
 import spray.json.DefaultJsonProtocol
-import actors.Query
 object JsonFormats {
   // import the default encoders for primitive types (Int, String, Lists etc)
 
@@ -14,4 +12,5 @@ object JsonFormats {
   implicit val filesJsonFormat = jsonFormat1(DataFiles)
   implicit val fileActionPerformedJsonFormat = jsonFormat1(FileActionPerformed)
   implicit val queryJsonFormat = jsonFormat3(Query)
+  implicit val generatedSummaryJsonFormat = jsonFormat7(GeneratedSummary)
 }

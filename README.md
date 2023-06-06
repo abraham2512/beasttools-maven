@@ -16,10 +16,9 @@ JDK8 Maven Scala2.12 Spark3.0 NodeJS
 #### Backend
 * Open with IntelliJ and use Maven to compile 
 * Create an empty folder "data" with sub-folders "indexed" and "viz"
-* Start Backend -> Edit configurations to use StartApp as main class to run as java 8 Application. 
-* Build -> `mvn clean package` (build fat jar)
-
-Deploy with `beast beasttools-1.1-RC.jar` 
+* To run in Debug mode or to Execute the code from an IDE, edit the execution configuration to use StartApp as the main class. Run with Java 18 and add the following VM options to the configuration:
+    * `--add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED`
+* Alternatively, Build -> `mvn clean package` (build fat jar) and Deploy with `beast beasttools-1.1-RC.jar`.
 Download the latest beast binary [here.](https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads)
 
 ## Authors
