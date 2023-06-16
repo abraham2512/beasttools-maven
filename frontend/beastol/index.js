@@ -164,18 +164,53 @@ function deleteDataset(dataset_name) {
  
 }
 function indexDataset(dataset_name) {
+  axios.post('http://127.0.0.1:8080/index', {
+    filename : dataset_name,
+    filesource : "test",
+    filestatus : "partitioned",
+    filetype : "geojson"
+  })
+  .then((resp)=>{
+    console.log(resp.status)
+    console.log('started r-tree indexing')
+  })
+  let indexing_status = null
+  let indexing_status_interval = setInterval(function(){
+    axios.get("http://127.0.0.1:8080/files").then(function(response){
+    //console.log(response.data);
+    let files = response.data['files'];
+    for (const file of Object.values(files)){
+      if (file.filename == dataset_name && file.filestatus == "rtree-indexed") {
+        console.log(file.filename,file.filestatus);
+        indexing_status = file.filestatus;
+        axios.put('http://127.0.0.1:8080/files',{
+            filename : dataset_name,
+            filesource : "test",
+            filestatus : "start",
+            filetype : "geojson"
+        })
+        .then((resp)=>{
+            console.log(resp.status)
+            console.log('r-tree partitioning and index creation started')
 
-    axios.put('http://127.0.0.1:8080/files',{
-        filename : dataset_name,
-        filesource : "test",
-        filestatus : "start",
-        filetype : "geojson"
-    })
-    .then((resp)=>{
-        console.log(resp.status)
-        console.log('r-tree partitioning and index creation started')
+        });
+        clearInterval(indexing_status_interval);
+      }
+    }
+    });
+  },5000)
 
-    })
+    // axios.put('http://127.0.0.1:8080/files',{
+    //     filename : dataset_name,
+    //     filesource : "test",
+    //     filestatus : "start",
+    //     filetype : "geojson"
+    // })
+    // .then((resp)=>{
+    //     console.log(resp.status)
+    //     console.log('r-tree partitioning and index creation started')
+
+    // })
 
 
 }
