@@ -11,11 +11,12 @@ import edu.ucr.cs.bdlab.beast.geolite.IFeature
 import models.DataFileDAL
 import org.apache.commons.io.FileUtils
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SaveMode
 
 import java.io.{File, FileNotFoundException}
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
-import utils.SparkFactory.sparkContext
+import utils.SparkFactory.{sparkContext, sparkSession}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -38,6 +39,7 @@ object FileRegistry {
   final case class GetSummaryStatus(filename: String, replyTo: ActorRef[String]) extends Command
   final case class GetSummary(filename: String, replyTo: ActorRef[GeneratedSummary]) extends Command
   final case class StartQuery(query:Query, replyTo: ActorRef[FileActionPerformed]) extends Command
+  final case class CreateFileFromQuery(sourceQuery:SourceQuery, replyTo: ActorRef[String]) extends Command // TODO async? hdfs actor?
 
 
   final case class CreateDataFrameFromSource(listing: Listing, file: DataFile) extends Command
@@ -256,6 +258,42 @@ object FileRegistry {
               FileRegistry.FileActionPerformed("No HDFS Actor, could not query dataset")
           }
           replyTo ! FileActionPerformed(s"indexed")
+          Behaviors.same
+
+        case CreateFileFromQuery(sourceQuery, replyTo) =>
+          try {
+            val table1_path = sourceQuery.path + "/table1.txt"
+            val table2_path = sourceQuery.path + "/table2.txt"
+
+            val table1_df = sparkSession.read.options(Map("delimiter"->" ")).csv(table1_path)
+            table1_df.createOrReplaceTempView("table1")
+            val table2_df = sparkSession.read.options(Map("delimiter"->" ")).csv(table2_path)
+            table2_df.createOrReplaceTempView("table2")
+
+            val new_DF = sparkSession.sql(sourceQuery.query)
+
+            // Save output as shapefile at data source
+            val df_outPath = (sourceQuery.path.split('/').dropRight(1) :+ "download").mkString("/")
+            val output_path =  new File(df_outPath)
+
+            new_DF.write.format("shapefile").mode(SaveMode.Overwrite).save(output_path.getPath)
+
+            // Add as dataset in beast-tools
+            val df_outPath2 = "data/datasource/" + sourceQuery.filename
+            val output_path2 =  new File(df_outPath2)
+            new_DF.write.format("shapefile").mode(SaveMode.Overwrite).save(output_path2.getPath)
+
+            val output_file = DataFile(filename = sourceQuery.filename, filetype = "shapefile", filestatus = "partitioned", filesource = df_outPath2 )
+            DataFileDAL.insert(output_file)
+
+            println( "actors.FileRegistry: Query output saved as shapefile at location: " + df_outPath )
+            replyTo ! df_outPath
+          } catch {
+            case e: Exception =>
+              println("actors.FileRegistry: Error :" + e.toString)
+              e.printStackTrace()
+              replyTo ! "error"
+          }
           Behaviors.same
 
         //MESSAGES TO HDFS ACTOR

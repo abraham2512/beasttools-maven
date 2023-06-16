@@ -28,6 +28,10 @@ case class GeneratedSummary(size: Long, num_features: Long, num_points: Long, ge
   def apply(size: Long, num_features: Long, num_points: Long, geometry_type: String, extent: Array[Double], avg_sidelength: Array[Double], attributes: Array[Map[String, String]]): GeneratedSummary = { GeneratedSummary(size, num_features, num_points, geometry_type, extent, avg_sidelength, attributes)}
 }
 
+case class SourceQuery(query:String, path:String, filename:String){
+  def apply(query:String, path: String, filename:String): SourceQuery = { SourceQuery(query, path, filename) }
+}
+
 //The Routing Logic class
 class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[TileActor.TileCommand])(implicit val system: ActorSystem[_]) {
 
@@ -73,6 +77,9 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
 
   def runQuery(query: Query): Future[FileActionPerformed] =
     fileRegistry.ask(StartQuery(query,_))
+
+  def createFileFromQuery(sourceQuery: SourceQuery): Future[String] =
+    fileRegistry.ask(CreateFileFromQuery(sourceQuery, _))
 
   //This function handles situations when the tile could not be generated on the fly
   private val tileOnTheFlyHandler = RejectionHandler.newBuilder
@@ -224,13 +231,27 @@ class Routes(fileRegistry: ActorRef[FileRegistry.Command], tileActor: ActorRef[T
             pathEnd {
               get {
                 parameters("filename") { (filename) =>
-                  onSuccess(getSummaryStatus(filename)) { status =>
+                  onSuccess( getSummaryStatus(filename) ) { status =>
                     complete(StatusCodes.OK, status)
                   }
                 }
               }
             }
-            }
+          } ~
+          pathPrefix("source_query") {
+            concat(
+              pathEnd {
+                post {
+                  entity(as[SourceQuery]) { sourceQuery =>
+                    onSuccess(createFileFromQuery(sourceQuery)) { returnPath =>
+                      complete(StatusCodes.OK, returnPath)
+                    }
+
+                  }
+                }
+              }
+            )
+          }
         }
       }
         }
