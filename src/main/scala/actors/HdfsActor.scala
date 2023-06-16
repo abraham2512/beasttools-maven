@@ -139,16 +139,16 @@ object HdfsActor {
             println("actors.HdfsActor: Converting file " + file.filename + " to RDD")
             val input_path = "data/indexed/" + file.filename
             //geojson
-            //            val input_df  = sparkSession.read.format("geojson").load(input_path)
+//            val input_df  = sparkSession.read.format("geojson").load(input_path)
 
             //csv
 
-            //            val input_df = SpatialCSVSource.read(sparkSession, input_path, Seq(SpatialCSVSource.GeometryType -> "point",
-            //              "header" -> "true", SpatialCSVSource.DimensionColumns -> "x,y", "delimiter" -> " ").toMap.asJava)
+//            val input_df = SpatialCSVSource.read(sparkSession, input_path, Seq(SpatialCSVSource.GeometryType -> "point",
+//              "header" -> "true", SpatialCSVSource.DimensionColumns -> "x,y", "delimiter" -> " ").toMap.asJava)
 
 
             //shapefile
-            //            val input_dff = sparkSession.read.format("rtree").load(input_path)
+//            val input_dff = sparkSession.read.format("rtree").load(input_path)
 
 
             val input_rdd = sparkContext.spatialFile(input_path)
@@ -227,6 +227,7 @@ object HdfsActor {
               println("actors.HdfsActor: Dataset does not exist :" + e.toString)
             case e: Exception =>
               println("actors.HdfsActor: " + e.toString)
+              e.printStackTrace()
           }
           Behaviors.same
         }
