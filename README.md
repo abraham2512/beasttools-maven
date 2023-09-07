@@ -4,6 +4,8 @@ Akka Actors and Akka HTTP based microservice built for distributed processing an
 
 For more documentation, please check this link https://abraham2512.github.io/beastapi-docs/
 
+Please read about the Akka licensing changes on this page https://www.lightbend.com/akka/license-faq
+
 ### Dependencies
 JDK8 Maven Scala2.12 Spark3.0 NodeJS 
 
@@ -18,13 +20,15 @@ JDK8 Maven Scala2.12 Spark3.0 NodeJS
 * Create an empty folder "data" with sub-folders "indexed" and "viz"
 * To run in Debug mode or to Execute the code from an IDE, edit the execution configuration to use StartApp as the main class. Run with Java 18 and add the following VM options to the configuration:
     * `--add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED`
-* Alternatively, Build -> `mvn clean package` (build fat jar) and Deploy with `beast beasttools-1.1-RC.jar`.
-Download the latest beast binary [here.](https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads)
+* Alternatively, Build -> `mvn clean package` (build fat jar) and Deploy with `beast beasttools-1.1-RC.jar`. Download the latest beast binary [here.](https://bitbucket.org/bdlabucr/beast/downloads/?tab=downloads)
 
 ## Authors
 
 Abraham Miller  
 email: apala049@ucr.edu 
+
+Avinash Sidhwani  
+email: avinash.sidhwani@email.ucr.edu 
 
 ## Version History
 
